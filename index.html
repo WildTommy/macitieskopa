@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="lv">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f8f6f0" />
+    <title>Mācību konspekti</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f8f6f0;
+        --text: #292d2a;
+        --muted: #5c625e;
+        --line: #cfd2c8;
+        --soft: #eceee6;
+        --accent: #3e5c49;
+        --error: #923e32;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          16px/1.5 system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+      main {
+        width: 100%;
+        max-width: 500px;
+        margin: 32px auto;
+        padding: 0 16px;
+      }
+      h1 {
+        font-size: 27px;
+        line-height: 1.25;
+        letter-spacing: -0.025em;
+        margin: 0 0 18px;
+      }
+      p {
+        margin: 8px 0 14px;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      input,
+      button {
+        font: inherit;
+      }
+      input {
+        display: block;
+        width: 100%;
+        height: 46px;
+        padding: 9px 11px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 16px;
+      }
+      button {
+        min-height: 44px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 9px 13px;
+        background: var(--soft);
+        color: var(--text);
+        cursor: pointer;
+      }
+      button:focus-visible,
+      input:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+      button:hover:not(:disabled) {
+        border-color: var(--accent);
+      }
+      .submit {
+        width: 100%;
+        margin-top: 12px;
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      .status {
+        font-size: 14px;
+        color: var(--error);
+        margin: 10px 0 0;
+      }
+      .greeting {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+      .choices {
+        display: grid;
+        gap: 10px;
+      }
+      .choice {
+        width: 100%;
+        padding: 13px;
+        text-align: left;
+        line-height: 1.45;
+      }
+      .choice strong {
+        display: block;
+        font-size: 16px;
+        font-weight: 650;
+      }
+      .choice small {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+      button:disabled {
+        cursor: default;
+        opacity: 0.65;
+      }
+      .change-name {
+        display: block;
+        margin-top: 18px;
+        background: transparent;
+        border: 0;
+        padding: 7px 0;
+        font-size: 14px;
+        color: var(--muted);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      @media (min-width: 600px) {
+        main {
+          margin-top: 48px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section id="login" aria-labelledby="login-title">
+        <h1 id="login-title">kā tevi sauc?</h1>
+        <form id="name-form">
+          <label for="name">Tavs vārds</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            autocomplete="given-name"
+            autocapitalize="words"
+            spellcheck="false"
+            maxlength="80"
+            aria-describedby="login-message"
+            required
+          />
+          <button id="submit" class="submit" type="submit" disabled>
+            Turpināt
+          </button>
+          <p
+            id="login-message"
+            class="status"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></p>
+        </form>
+        <noscript
+          ><p class="status">
+            Lai atvērtu konspektus, pārlūkā jāieslēdz JavaScript.
+          </p></noscript
+        >
+      </section>
+
+      <section id="menu" aria-labelledby="menu-title" hidden>
+        <p id="greeting" class="greeting"></p>
+        <h1 id="menu-title" tabindex="-1">Izvēlies konspektu</h1>
+        <div class="choices">
+          <button id="project" class="choice" type="button">
+            <strong>Projektu vadība</strong>
+            <small>Tēmas 2., 3., 3.2</small>
+          </button>
+          <button class="choice" type="button" disabled>
+            <strong>Preču realizācijas vadība (1.KD)</strong>
+            <small>Drīzumā — konspekts vēl nav pievienots.</small>
+          </button>
+        </div>
+        <p
+          id="menu-message"
+          class="status"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></p>
+        <button id="change-name" class="change-name" type="button">
+          Mainīt vārdu / iziet
+        </button>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        "use strict";
+
+        // Ja konspekta failu pārsauc, nomaini šo nosaukumu.
+        const PROJECT_FILE = "projektu-vadiba-konspekts.html";
+        const AUTH_KEY = "macibas.auth.v1";
+        const ENTRY_KEY = "macibas.entry.v1";
+        const NAMES = { toms: "Toms", arta: "Arta", gabriela: "Gabriēla" };
+        const $ = (id) => document.getElementById(id);
+        const normalize = (value) =>
+          value
+            .trim()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase();
+        const token = () =>
+          Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) =>
+            byte.toString(16).padStart(2, "0"),
+          ).join("");
+
+        function message(id, text) {
+          $(id).textContent = text;
+          $(id).hidden = !text;
+        }
+
+        function clearSession() {
+          sessionStorage.removeItem(AUTH_KEY);
+          sessionStorage.removeItem(ENTRY_KEY);
+        }
+
+        function readAuth() {
+          try {
+            const auth = JSON.parse(sessionStorage.getItem(AUTH_KEY) || "null");
+            return auth &&
+              typeof auth.id === "string" &&
+              auth.id.length === 32 &&
+              Object.values(NAMES).includes(auth.name)
+              ? auth
+              : null;
+          } catch {
+            return null;
+          }
+        }
+
+        function showLogin(text = "") {
+          $("menu").hidden = true;
+          $("login").hidden = false;
+          $("name").value = "";
+          $("name").removeAttribute("aria-invalid");
+          message("login-message", text);
+          message("menu-message", "");
+        }
+
+        function showMenu(auth, focus = false) {
+          $("greeting").textContent = `Sveiki, ${auth.name}!`;
+          $("login").hidden = true;
+          $("menu").hidden = false;
+          message("menu-message", "");
+          if (focus) $("menu-title").focus();
+        }
+
+        function initialize() {
+          // HTTP(S) vajadzīgs, lai abiem failiem būtu kopīga pārlūka sesija.
+          if (!["http:", "https:"].includes(location.protocol)) {
+            showLogin(
+              "Atver lapu caur VS Code Live Server vai vietnes adresi (HTTP/HTTPS), nevis ar dubultklikšķi uz faila.",
+            );
+            $("submit").disabled = true;
+            return;
+          }
+          try {
+            const testKey = "macibas.storage-test";
+            sessionStorage.setItem(testKey, "1");
+            sessionStorage.removeItem(testKey);
+            const url = new URL(location.href);
+            const loginRequired = url.searchParams.get("login") === "required";
+            if (loginRequired) {
+              clearSession();
+              url.searchParams.delete("login");
+              history.replaceState(history.state, "", url.href);
+            }
+            $("submit").disabled = false;
+            const auth = readAuth();
+            if (auth) showMenu(auth);
+            else showLogin(loginRequired ? "Vispirms ievadi savu vārdu." : "");
+          } catch {
+            showLogin(
+              "Pārlūks bloķē sesijas saglabāšanu. Atļauj šai vietnei izmantot pārlūka krātuvi un pārlādē lapu.",
+            );
+            $("submit").disabled = true;
+          }
+        }
+
+        $("name-form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          if ($("submit").disabled) return;
+          const key = normalize($("name").value);
+          if (!Object.hasOwn(NAMES, key)) {
+            $("name").setAttribute("aria-invalid", "true");
+            message(
+              "login-message",
+              "Šim vārdam piekļuve nav piešķirta. Pārbaudi ievadīto vārdu.",
+            );
+            return;
+          }
+          try {
+            clearSession();
+            const auth = { name: NAMES[key], id: token() };
+            sessionStorage.setItem(AUTH_KEY, JSON.stringify(auth));
+            $("name").value = "";
+            showMenu(auth, true);
+          } catch {
+            message(
+              "login-message",
+              "Neizdevās saglabāt sesiju. Pārbaudi pārlūka krātuves atļaujas.",
+            );
+          }
+        });
+
+        $("name").addEventListener("input", () => {
+          $("name").removeAttribute("aria-invalid");
+          if (!$("submit").disabled) message("login-message", "");
+        });
+
+        $("project").addEventListener("click", () => {
+          const auth = readAuth();
+          if (!auth) {
+            showLogin("Sesija ir beigusies. Ievadi vārdu vēlreiz.");
+            return;
+          }
+          try {
+            const url = new URL(PROJECT_FILE, location.href);
+            const entryToken = token();
+            sessionStorage.setItem(
+              ENTRY_KEY,
+              JSON.stringify({
+                token: entryToken,
+                session: auth.id,
+                path: url.pathname,
+                expires: Date.now() + 120000,
+              }),
+            );
+            url.searchParams.set("entry", entryToken);
+            location.assign(url.href); // Atver tajā pašā cilnē.
+          } catch {
+            message(
+              "menu-message",
+              "Konspektu neizdevās atvērt. Pamēģini ievadīt vārdu vēlreiz.",
+            );
+          }
+        });
+
+        $("change-name").addEventListener("click", () => {
+          try {
+            clearSession();
+          } catch {}
+          showLogin();
+          $("name").focus();
+        });
+
+        // Pārbauda arī lapas atjaunošanu no pārlūka atmiņas ar pogu Atpakaļ.
+        window.addEventListener("pageshow", (event) => {
+          if (event.persisted) initialize();
+        });
+        initialize();
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,2623 @@
+<!doctype html>
+<html lang="lv">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html:not([data-study-access]) {
+        visibility: hidden !important;
+      }
+    </style>
+    <noscript>
+      <meta http-equiv="refresh" content="0;url=index.html?login=required" />
+    </noscript>
+    <script>
+      (() => {
+        const AUTH = "macibas.auth.v1";
+        const ENTRY = "macibas.entry.v1";
+
+        function checkAccess() {
+          let allowed = false;
+
+          try {
+            const auth = JSON.parse(sessionStorage.getItem(AUTH) || "null");
+            const validUser =
+              auth &&
+              typeof auth.id === "string" &&
+              auth.id.length === 32 &&
+              ["Toms", "Arta", "Gabriēla"].includes(auth.name);
+
+            const url = new URL(location.href);
+            const entryToken = url.searchParams.get("entry");
+
+            if (validUser && entryToken) {
+              const entry = JSON.parse(sessionStorage.getItem(ENTRY) || "null");
+
+              allowed = !!(
+                entry &&
+                entry.token === entryToken &&
+                entry.session === auth.id &&
+                entry.path === location.pathname &&
+                Number.isFinite(entry.expires) &&
+                entry.expires > Date.now()
+              );
+
+              if (allowed) {
+                sessionStorage.removeItem(ENTRY);
+                url.searchParams.delete("entry");
+
+                history.replaceState(
+                  {
+                    ...history.state,
+                    macibasAccess: {
+                      session: auth.id,
+                      path: location.pathname,
+                    },
+                  },
+                  "",
+                  url.href,
+                );
+              }
+            } else if (validUser) {
+              const grant = history.state && history.state.macibasAccess;
+
+              allowed = !!(
+                grant &&
+                grant.session === auth.id &&
+                grant.path === location.pathname
+              );
+            }
+          } catch {
+            allowed = false;
+          }
+
+          document.documentElement.toggleAttribute(
+            "data-study-access",
+            allowed,
+          );
+
+          if (!allowed) {
+            try {
+              sessionStorage.removeItem(AUTH);
+              sessionStorage.removeItem(ENTRY);
+            } catch {}
+
+            location.replace("index.html?login=required");
+          }
+        }
+
+        window.addEventListener("pagehide", () => {
+          document.documentElement.removeAttribute("data-study-access");
+        });
+
+        window.addEventListener("pageshow", checkAccess);
+        checkAccess();
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f8f6f0" />
+    <meta
+      name="description"
+      content="Kompakts projektu vadības konspekts: organizācija, interesenti, riski, produkta prasības, fāzes un izmaksas."
+    />
+    <title>Projektu vadība — mācību konspekts</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f8f6f0;
+        --fg: #292d2a;
+        --muted: #5c625e;
+        --line: #cfd2c8;
+        --soft: #eceee6;
+        --accent: #3e5c49;
+        --bar: #f8f6f0;
+        --mark: #e6dfad;
+        --size: 16px;
+        --top: 58px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-padding-top: calc(var(--top) + 12px);
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          var(--size)/1.5 system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        overflow-wrap: break-word;
+      }
+      body.dark {
+        color-scheme: dark;
+        --bg: #1c211e;
+        --fg: #e1e4dc;
+        --muted: #adb6aa;
+        --line: #465047;
+        --soft: #29322b;
+        --accent: #b6cdb4;
+        --bar: #1c211e;
+        --mark: #665e2e;
+      }
+      a {
+        color: var(--accent);
+        text-underline-offset: 3px;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        color: var(--fg);
+        background: var(--soft);
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        min-height: 38px;
+        cursor: pointer;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      input:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      button:hover {
+        border-color: var(--accent);
+      }
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--bar);
+        border-bottom: 1px solid var(--line);
+        padding: 7px 12px;
+      }
+      .toolbar-inner {
+        max-width: 820px;
+        margin: auto;
+        display: flex;
+        gap: 7px;
+        align-items: center;
+      }
+      .search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+      }
+      .search-wrap input {
+        width: 100%;
+        height: 40px;
+        padding: 7px 37px 7px 10px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        color: var(--fg);
+        background: var(--bg);
+        font-size: 16px;
+        appearance: none;
+      }
+      .search-wrap input::-webkit-search-cancel-button {
+        display: none;
+      }
+      .clear {
+        position: absolute;
+        right: 1px;
+        top: 1px;
+        min-width: 34px;
+        border: 0;
+        background: transparent;
+        font-size: 23px;
+        line-height: 1;
+      }
+      .toc-toggle {
+        padding: 0 10px;
+        height: 40px;
+      }
+      .panel {
+        position: fixed;
+        top: var(--top);
+        left: 0;
+        right: 0;
+        z-index: 19;
+        background: var(--bar);
+        border-bottom: 1px solid var(--line);
+        box-shadow: 0 7px 14px #0002;
+        max-height: min(70vh, 620px);
+        overflow: auto;
+        overscroll-behavior: contain;
+      }
+      .panel-inner {
+        max-width: 844px;
+        margin: auto;
+        padding: 10px 12px;
+      }
+      .panel[hidden],
+      button[hidden] {
+        display: none;
+      }
+      .result {
+        display: block;
+        padding: 10px 2px;
+        border-top: 1px solid var(--line);
+        color: var(--fg);
+        text-decoration: none;
+      }
+      .result strong {
+        display: block;
+        font-size: 0.97em;
+      }
+      .result small {
+        display: block;
+        color: var(--muted);
+        font-size: 0.84em;
+        line-height: 1.45;
+        margin-top: 2px;
+      }
+      .result:hover,
+      .result:focus {
+        background: var(--soft);
+      }
+      .result-meta {
+        font-size: 0.82em;
+        color: var(--muted);
+        margin: 0 0 7px;
+      }
+      .toc-links {
+        display: grid;
+        gap: 2px;
+      }
+      .toc-links a {
+        font-size: 0.94em;
+        text-decoration: none;
+        padding: 6px 2px;
+      }
+      .toc-group {
+        font-size: 0.8em;
+        font-weight: 700;
+        color: var(--muted);
+        margin: 10px 0 1px;
+      }
+      .prefs {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--line);
+        font-size: 0.88em;
+      }
+      .prefs button {
+        padding: 2px 10px;
+      }
+      .prefs label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 38px;
+      }
+      .prefs input {
+        width: 18px;
+        height: 18px;
+      }
+      main {
+        max-width: 844px;
+        margin: auto;
+        padding: 16px 12px 26px;
+      }
+      header h1 {
+        font-size: 1.65em;
+        line-height: 1.2;
+        letter-spacing: -0.025em;
+        margin: 0 0 8px;
+      }
+      header p {
+        margin: 7px 0;
+      }
+      .intro {
+        font-size: 0.93em;
+        color: var(--muted);
+      }
+      .group-title {
+        font-size: 0.81em;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin: 29px 0 0;
+        color: var(--accent);
+        font-weight: 700;
+        border-top: 2px solid var(--line);
+        padding-top: 11px;
+      }
+      .chapter {
+        padding-top: 17px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--line);
+        scroll-margin-top: 12px;
+      }
+      .chapter:last-child {
+        border: 0;
+      }
+      .chapter h2 {
+        font-size: 1.25em;
+        line-height: 1.3;
+        letter-spacing: -0.015em;
+        margin: 0 0 10px;
+      }
+      .num {
+        font-variant-numeric: tabular-nums;
+        color: var(--muted);
+        font-size: 0.78em;
+        margin-right: 7px;
+        font-weight: 500;
+      }
+      h3 {
+        font-size: 1.03em;
+        line-height: 1.35;
+        margin: 16px 0 6px;
+      }
+      p {
+        margin: 8px 0;
+      }
+      ul,
+      ol {
+        padding-left: 21px;
+        margin: 8px 0;
+      }
+      li {
+        padding-left: 1px;
+        margin: 4px 0;
+      }
+      dl {
+        margin: 8px 0;
+      }
+      dt {
+        font-weight: 650;
+        margin-top: 9px;
+      }
+      dd {
+        margin: 2px 0 8px;
+      }
+      .compact dt {
+        margin-top: 6px;
+      }
+      .compact dd {
+        margin-bottom: 5px;
+      }
+      .key {
+        padding: 8px 10px;
+        border-left: 3px solid var(--accent);
+        background: var(--soft);
+        font-size: 0.95em;
+        margin: 12px 0;
+      }
+      .example {
+        border-left: 2px solid var(--line);
+        padding: 1px 0 1px 10px;
+        margin: 12px 0;
+        font-size: 0.94em;
+      }
+      .example p {
+        margin: 7px 0;
+      }
+      .note {
+        font-size: 0.85em;
+        color: var(--muted);
+      }
+      .source {
+        font-size: 0.75em;
+        color: var(--muted);
+        margin: 12px 0 5px;
+      }
+      .formula {
+        font-size: 0.94em;
+        line-height: 1.65;
+        background: var(--soft);
+        padding: 8px 10px;
+        margin: 10px 0;
+      }
+      .matrix {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border-top: 1px solid var(--line);
+        border-left: 1px solid var(--line);
+        font-size: 0.89em;
+        margin: 11px 0;
+      }
+      .matrix > div {
+        padding: 9px 8px;
+        border-bottom: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+      }
+      .matrix .axis {
+        padding: 6px 8px;
+        background: var(--soft);
+        font-size: 0.84em;
+        font-weight: 600;
+      }
+      .matrix strong {
+        display: inline-block;
+        margin-bottom: 3px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.9em;
+        margin: 10px 0;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 7px 8px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        background: var(--soft);
+        font-weight: 600;
+      }
+      th:last-child,
+      td:last-child {
+        width: 32%;
+      }
+      .diagram {
+        margin: 12px 0 10px;
+        padding: 0;
+      }
+      .diagram svg {
+        width: 100%;
+        max-width: 400px;
+        display: block;
+        margin: 0 auto;
+        height: auto;
+      }
+      .lines {
+        fill: none;
+        stroke: var(--muted);
+        stroke-width: 1.5;
+      }
+      .dash {
+        stroke-dasharray: 4 3;
+      }
+      .boxes rect {
+        fill: var(--soft);
+        stroke: var(--line);
+        rx: 3;
+      }
+      .labels {
+        fill: var(--fg);
+        font:
+          12px system-ui,
+          sans-serif;
+        text-anchor: middle;
+      }
+      .diagram figcaption {
+        font-size: 0.76em;
+        color: var(--muted);
+        margin-top: 3px;
+        text-align: center;
+      }
+      .phase-list li {
+        margin: 5px 0;
+      }
+      .sources {
+        font-size: 0.9em;
+      }
+      .visited-target {
+        animation: targetflash 1.7s ease-out;
+      }
+      mark {
+        background: var(--mark);
+        color: inherit;
+      }
+      .bottom-link {
+        display: inline-block;
+        margin-top: 15px;
+        font-size: 0.9em;
+      }
+      .noscript {
+        font-size: 0.85em;
+        color: var(--muted);
+      }
+      @keyframes targetflash {
+        0%,
+        40% {
+          background: var(--soft);
+        }
+        100% {
+          background: transparent;
+        }
+      }
+      @media (min-width: 700px) {
+        main {
+          padding: 22px 24px 40px;
+        }
+        .toolbar {
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+        .panel-inner {
+          padding: 12px 24px;
+        }
+        .toc-links {
+          grid-template-columns: 1fr 1fr;
+          column-gap: 20px;
+        }
+        .toc-group {
+          grid-column: 1/-1;
+        }
+        .chapter {
+          padding-top: 22px;
+        }
+        .matrix {
+          font-size: 0.95em;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+      @media print {
+        .toolbar,
+        .panel,
+        .bottom-link {
+          display: none !important;
+        }
+        main {
+          max-width: none;
+          padding: 0;
+        }
+        body,
+        body.dark {
+          --bg: white;
+          --fg: #111;
+          --muted: #444;
+          --line: #aaa;
+          --soft: #f2f2f2;
+          --accent: #222;
+          font-size: 11pt;
+          background: white;
+          color: #111;
+        }
+        .chapter {
+          break-inside: auto;
+        }
+        .chapter h2,
+        h3 {
+          break-after: avoid;
+        }
+        .diagram,
+        .matrix,
+        table,
+        .example,
+        .key {
+          break-inside: avoid;
+        }
+        .group-title {
+          margin-top: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body id="sakums">
+    <div class="toolbar">
+      <div class="toolbar-inner">
+        <div class="search-wrap">
+          <label
+            for="search"
+            class="sr-only"
+            style="
+              position: absolute;
+              width: 1px;
+              height: 1px;
+              overflow: hidden;
+              clip-path: inset(50%);
+            "
+            >Meklēt visā konspektā</label
+          ><input
+            id="search"
+            type="search"
+            placeholder="Meklēt tēmu vai jēdzienu…"
+            autocomplete="off"
+            spellcheck="false"
+            aria-controls="search-panel"
+            aria-expanded="false"
+          /><button
+            id="clear"
+            class="clear"
+            type="button"
+            aria-label="Notīrīt meklējumu"
+            hidden
+          >
+            ×
+          </button>
+        </div>
+        <button
+          id="toc-toggle"
+          class="toc-toggle"
+          type="button"
+          aria-controls="toc-panel"
+          aria-expanded="false"
+        >
+          Saturs
+        </button>
+      </div>
+    </div>
+    <div
+      id="search-panel"
+      class="panel"
+      role="region"
+      aria-label="Meklēšanas rezultāti"
+      hidden
+    >
+      <div class="panel-inner">
+        <p
+          id="result-status"
+          class="result-meta"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <div id="results"></div>
+      </div>
+    </div>
+    <nav id="toc-panel" class="panel" aria-label="Konspekta saturs" hidden>
+      <div class="panel-inner">
+        <div class="prefs">
+          <span>Teksts</span
+          ><button id="smaller" type="button" aria-label="Samazināt tekstu">
+            A−</button
+          ><span id="font-status">16 px</span
+          ><button id="larger" type="button" aria-label="Palielināt tekstu">
+            A+</button
+          ><label><input id="night" type="checkbox" />Tumšs fons</label>
+        </div>
+        <div class="toc-links">
+          <div class="toc-group">Organizācija un lomas</div>
+          <a href="#organizacijas-izvele" data-jump="organizacijas-izvele"
+            >01. Organizācijas formas izvēle</a
+          >
+          <a href="#tira" data-jump="tira">02. Tīrā projekta organizācija</a>
+          <a href="#staba" data-jump="staba">03. Štāba projekta organizācija</a>
+          <a href="#matrica" data-jump="matrica"
+            >04. Matricas projekta organizācija</a
+          >
+          <a href="#citas-formas" data-jump="citas-formas"
+            >05. Citas organizācijas formas</a
+          >
+          <a href="#lomas" data-jump="lomas"
+            >06. Projekta institūcijas un lomas</a
+          >
+          <div class="toc-group">Interesenti un SVID</div>
+          <a href="#interesenti" data-jump="interesenti"
+            >07. Interesenti un viņu analīze</a
+          >
+          <a href="#interesentu-matrica" data-jump="interesentu-matrica"
+            >08. Ietekmes un intereses matrica</a
+          >
+          <a href="#svid" data-jump="svid">09. SVID analīze</a>
+          <div class="toc-group">Riski un izmaiņas</div>
+          <a href="#risks-un-vide" data-jump="risks-un-vide"
+            >10. Risks, risku vadība un projekta vide</a
+          >
+          <a href="#risku-veidi" data-jump="risku-veidi"
+            >11. Risku piemēri projekta posmos</a
+          >
+          <a href="#risku-novertesana" data-jump="risku-novertesana"
+            >12. Risku novērtēšana</a
+          >
+          <a href="#risku-reakcijas" data-jump="risku-reakcijas"
+            >13. Četras reakcijas uz risku</a
+          >
+          <a href="#risku-plans" data-jump="risku-plans"
+            >14. Risku vadīšanas plāns un atbildība</a
+          >
+          <a href="#risku-registrs" data-jump="risku-registrs"
+            >15. Risku reģistrs un plānošanas riski</a
+          >
+          <a href="#izmainas" data-jump="izmainas"
+            >16. Projekta satura izmaiņu vadība</a
+          >
+          <div class="toc-group">Koncepts, laiks un izmaksas</div>
+          <a href="#koncepts" data-jump="koncepts"
+            >17. Projekta koncepts un spriedzes trijstūris</a
+          >
+          <a href="#produkta-prasibas" data-jump="produkta-prasibas"
+            >18. Gala produkta prasību definēšana</a
+          >
+          <a href="#laika-planosana" data-jump="laika-planosana"
+            >19. Projekta laika noteikšana un fāzes</a
+          >
+          <a href="#starts-izpete" data-jump="starts-izpete"
+            >20. Starts, plānošana un priekšizpēte</a
+          >
+          <a href="#koncepciju-fazes" data-jump="koncepciju-fazes"
+            >21. Pamatkoncepcija un detaļkoncepcija</a
+          >
+          <a href="#istenosana-ieviesana" data-jump="istenosana-ieviesana"
+            >22. Īstenošana un ieviešana</a
+          >
+          <a href="#noslegums" data-jump="noslegums">23. Projekta noslēgums</a>
+          <a href="#izmaksu-struktura" data-jump="izmaksu-struktura"
+            >24. Projekta izmaksas un to struktūra</a
+          >
+          <a href="#vadisanas-izmaksas" data-jump="vadisanas-izmaksas"
+            >25. Projekta vadīšanas izmaksu aprēķins</a
+          >
+          <a href="#produkta-izmaksas" data-jump="produkta-izmaksas"
+            >26. Produkta izveides un ieviešanas izmaksas</a
+          >
+          <div class="toc-group">Atkārtošanai</div>
+          <a href="#atkartojums" data-jump="atkartojums"
+            >27. Īsais atkārtojums un avoti</a
+          >
+        </div>
+      </div>
+    </nav>
+    <main>
+      <header>
+        <h1>Projektu vadība</h1>
+        <p><strong>Mācību konspekts no trim materiāliem</strong></p>
+        <p class="intro">
+          Organizācija un lomas · interesenti un SVID · riski · projekta
+          koncepts, laiks un izmaksas.
+        </p>
+        <p class="intro">
+          Meklētājs augšā paliek pieejams arī ritinot. Tas meklē visā tekstā un
+          saprot arī vārdus bez garumzīmēm. Sadaļā „Saturs” vari mainīt teksta
+          lielumu un fonu.
+        </p>
+      </header>
+      <noscript
+        ><p class="noscript">
+          Meklētājam nepieciešams JavaScript. Viss konspekta teksts ir lasāms
+          arī bez tā; meklēšanai vari izmantot pārlūka funkciju „Atrast lapā”.
+        </p></noscript
+      >
+      <div class="group-title">Organizācija un lomas</div>
+      <section
+        class="chapter"
+        id="organizacijas-izvele"
+        data-keywords="struktūra struktūras pakļautība organizatoriskā forma"
+      >
+        <h2 tabindex="-1">
+          <span class="num">01</span>Organizācijas formas izvēle
+        </h2>
+        <div class="content">
+          <p>
+            Projekta organizācija nosaka,
+            <strong
+              >kas vada darbu, kam darbinieki pakļaujas un kurš pieņem
+              lēmumus</strong
+            >. Formu izvēlas atbilstoši projekta sarežģītībai, darba apjomam,
+            laika ierobežojumam un personāla kapacitātei.
+          </p>
+          <dl class="compact">
+            <dt>Tīrā forma</dt>
+            <dd>
+              Atsevišķa komanda uz projekta laiku; darbinieki tieši pakļauti
+              projekta vadītājam.
+            </dd>
+            <dt>Štāba forma</dt>
+            <dd>
+              Esošā struktūra saglabājas; projekta vadītājs koordinē, bet nedod
+              saistošus rīkojumus.
+            </dd>
+            <dt>Matricas forma</dt>
+            <dd>
+              Projekta un funkcionālās struktūrvienības vadītājs dala atbildību;
+              darbiniekam ir divējāda pakļautība.
+            </dd>
+          </dl>
+          <p class="key">
+            Galvenā atšķirība: cik lielas ir projekta vadītāja pilnvaras un kam
+            pakļaujas komanda.
+          </p>
+        </div>
+        <p class="source">Avots: 2 · 2.–3. lpp.</p>
+      </section>
+      <section class="chapter" id="tira" data-keywords="tīrā tīra pilnvaras">
+        <h2 tabindex="-1">
+          <span class="num">02</span>Tīrā projekta organizācija
+        </h2>
+        <div class="content">
+          <p>
+            Uz noteiktu laiku vienā organizatoriskā vienībā apvieno cilvēkus no
+            dažādām struktūrvienībām un nodod viņus
+            <strong>projekta vadītāja tiešā rīcībā</strong>. Komanda pilnībā
+            koncentrējas uz projekta darbu.
+          </p>
+          <figure class="diagram">
+            <svg
+              viewBox="0 0 340 153"
+              role="img"
+              aria-label="Tīrā forma: organizācijas vadība, zem tās projekta vadītājs, kuram tieši pakļauti trīs projekta speciālisti."
+            >
+              <g class="lines">
+                <path d="M170 31V51M170 81V98M58 110V98H282V110" />
+              </g>
+              <g class="boxes">
+                <rect x="94" y="2" width="152" height="29" />
+                <rect x="94" y="51" width="152" height="30" />
+                <rect x="4" y="110" width="108" height="30" />
+                <rect x="116" y="110" width="108" height="30" />
+                <rect x="228" y="110" width="108" height="30" />
+              </g>
+              <g class="labels">
+                <text x="170" y="21">Organizācijas vadība</text>
+                <text x="170" y="71">Projekta vadītājs</text>
+                <text x="58" y="130">Speciālists A</text>
+                <text x="170" y="130">Speciālists B</text>
+                <text x="282" y="130">Speciālists C</text>
+              </g>
+            </svg>
+            <figcaption>
+              Līnijas rāda tiešo pakļautību projekta darbā.
+            </figcaption>
+          </figure>
+          <h3>Priekšrocības</h3>
+          <ul>
+            <li>
+              Rīkojumu tiesības un atbildība koncentrēta vienā personā. Projekta
+              vadītājs atbild par veicamajiem darbiem, kvalitāti un metodēm.
+            </li>
+            <li>
+              Komandai ir viena skaidra autoritāte un kopīgs darba fokuss.
+            </li>
+            <li>
+              Īsi saziņas ceļi ļauj ātri risināt problēmas un pieņemt lēmumus.
+            </li>
+          </ul>
+          <h3>Trūkumi</h3>
+          <ul>
+            <li>
+              Grūti iegūt vajadzīgos darbiniekus no pamatorganizācijas
+              struktūrvienībām.
+            </li>
+            <li>Ne vienmēr visiem iespējams nodrošināt vienmērīgu noslodzi.</li>
+            <li>
+              Pēc projekta var būt grūti cilvēkus atgriezt iepriekšējās
+              darbavietās.
+            </li>
+            <li>
+              Projektā iegūtās zināšanas var būt grūti nodot pamatorganizācijai.
+            </li>
+          </ul>
+        </div>
+        <p class="source">Avots: 2 · 3.–5. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="staba"
+        data-keywords="štābs štāba staba lineārā koordinators"
+      >
+        <h2 tabindex="-1">
+          <span class="num">03</span>Štāba projekta organizācija
+        </h2>
+        <div class="content">
+          <p>
+            Atsevišķu projekta izpildes struktūrvienību neveido un esošo lineāro
+            struktūru nepārveido. Projekta vadītājam ir
+            <strong>štāba jeb atbalsta un koordinācijas loma</strong>; mērķi
+            jāpanāk ar ietekmi un sadarbību.
+          </p>
+          <figure class="diagram">
+            <svg
+              viewBox="0 0 340 178"
+              role="img"
+              aria-label="Štāba struktūra: darbinieki pakļaujas nodaļu vadītājiem. Projekta koordinators sadarbojas ar vadību un pārskata darbinieku darbu bez rīkojumu tiesībām."
+            >
+              <!-- Tiešā pakļautība -->
+              <g class="lines">
+                <path
+                  d="M123 35V55H60V75
+                        M123 55H186V75
+                        M60 113V139
+                        M186 113V139"
+                />
+              </g>
+
+              <!-- Koordinācija, nevis tiešā pakļautība -->
+              <g class="lines">
+                <path class="dash" d="M203 20H250" />
+                <path class="dash" d="M293 46V154H242" />
+              </g>
+
+              <g class="boxes">
+                <rect x="43" y="4" width="160" height="31" />
+                <rect x="250" y="4" width="86" height="42" />
+
+                <rect x="4" y="75" width="112" height="38" />
+                <rect x="130" y="75" width="112" height="38" />
+
+                <rect x="4" y="139" width="112" height="30" />
+                <rect x="130" y="139" width="112" height="30" />
+              </g>
+
+              <g class="labels">
+                <text x="123" y="24">Organizācijas vadība</text>
+
+                <text x="293" y="21">
+                  <tspan x="293">Projekta</tspan>
+                  <tspan x="293" dy="15">koordinators</tspan>
+                </text>
+
+                <text x="60" y="91">
+                  <tspan x="60">Nodaļas A</tspan>
+                  <tspan x="60" dy="15">vadītājs</tspan>
+                </text>
+
+                <text x="186" y="91">
+                  <tspan x="186">Nodaļas B</tspan>
+                  <tspan x="186" dy="15">vadītājs</tspan>
+                </text>
+
+                <text x="60" y="159">Darbinieki A</text>
+                <text x="186" y="159">Darbinieki B</text>
+              </g>
+            </svg>
+
+            <figcaption>
+              Nepārtraukta līnija — tiešā pakļautība. Pārtraukta — koordinācija
+              un darba izpildes pārskatīšana, nedodot saistošus rīkojumus.
+              Piemērā koordinācijas saite parādīta ar nodaļas B darbiniekiem.
+            </figcaption>
+          </figure>
+          <ul>
+            <li>
+              Projekta vadītājam nav rīkojumu vai lēmējtiesību; lēmumus pieņem
+              lineārās struktūras vadītājs.
+            </li>
+            <li>
+              Vadītāja uzdevumi galvenokārt ir termiņu un izmaksu uzraudzība.
+            </li>
+            <li>
+              Struktūras saglabāšana ļauj organizēt projektu esošās
+              organizācijas ietvaros.
+            </li>
+          </ul>
+          <h3>Trūkumi</h3>
+          <p>
+            Var trūkt personas, kura uzņemas atbildību par projektu kopumā.
+            Nodaļu intereses dominē pār projekta interesēm, koncentrēšanās uz
+            projektu ir nepietiekama un lēmumi top lēni.
+          </p>
+          <p class="key">
+            Atceries: štāba vadītājs ir koordinators — ietekme ir, formālu
+            pavēļu tiesību nav.
+          </p>
+        </div>
+        <p class="source">Avots: 2 · 6.–7. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="matrica"
+        data-keywords="matricas matrica dubulta pakļautība"
+      >
+        <h2 tabindex="-1">
+          <span class="num">04</span>Matricas projekta organizācija
+        </h2>
+        <div class="content">
+          <p>
+            Matricas forma apvieno tīrās un štāba formas iezīmes. Atbildību par
+            projektu uzņemas
+            <strong
+              >gan projekta vadītājs, gan lineārās struktūrvienības
+              vadītājs</strong
+            >.
+          </p>
+          <figure class="diagram">
+            <svg
+              viewBox="0 0 340 199"
+              role="img"
+              aria-label="Matricas struktūra: trīs nodaļu vadītāji augšā un divu projektu vadītāji kreisajā malā. Katrs speciālists saistīts gan ar savas nodaļas vadītāju vertikāli, gan ar sava projekta vadītāju horizontāli."
+            >
+              <!-- Vertikālais virziens: nodaļu vadība -->
+              <g class="lines">
+                <path
+                  d="M139 43V165
+                        M217 43V165
+                        M295 43V165"
+                />
+              </g>
+
+              <!-- Horizontālais virziens: projektu vadība -->
+              <g class="lines">
+                <path
+                  d="M90 100H295
+                        M90 165H295"
+                />
+              </g>
+
+              <g class="boxes">
+                <!-- Nodaļu vadītāji -->
+                <rect x="104" y="4" width="70" height="39" />
+                <rect x="182" y="4" width="70" height="39" />
+                <rect x="260" y="4" width="70" height="39" />
+
+                <!-- Projektu vadītāji -->
+                <rect x="2" y="82" width="88" height="36" />
+                <rect x="2" y="147" width="88" height="36" />
+
+                <!-- Speciālisti krustpunktos -->
+                <rect x="109" y="86" width="60" height="28" />
+                <rect x="187" y="86" width="60" height="28" />
+                <rect x="265" y="86" width="60" height="28" />
+
+                <rect x="109" y="151" width="60" height="28" />
+                <rect x="187" y="151" width="60" height="28" />
+                <rect x="265" y="151" width="60" height="28" />
+              </g>
+
+              <g class="labels">
+                <text x="139" y="20">
+                  <tspan x="139">Nodaļas A</tspan>
+                  <tspan x="139" dy="15">vadītājs</tspan>
+                </text>
+                <text x="217" y="20">
+                  <tspan x="217">Nodaļas B</tspan>
+                  <tspan x="217" dy="15">vadītājs</tspan>
+                </text>
+                <text x="295" y="20">
+                  <tspan x="295">Nodaļas C</tspan>
+                  <tspan x="295" dy="15">vadītājs</tspan>
+                </text>
+
+                <text x="46" y="97">
+                  <tspan x="46">Projekta 1</tspan>
+                  <tspan x="46" dy="15">vadītājs</tspan>
+                </text>
+                <text x="46" y="162">
+                  <tspan x="46">Projekta 2</tspan>
+                  <tspan x="46" dy="15">vadītājs</tspan>
+                </text>
+
+                <text x="139" y="104">Spec. A1</text>
+                <text x="217" y="104">Spec. B1</text>
+                <text x="295" y="104">Spec. C1</text>
+
+                <text x="139" y="169">Spec. A2</text>
+                <text x="217" y="169">Spec. B2</text>
+                <text x="295" y="169">Spec. C2</text>
+              </g>
+            </svg>
+
+            <figcaption>
+              Speciālistam ir divējāda pakļautība: vertikāli — savas nodaļas
+              vadītājam, horizontāli — attiecīgā projekta vadītājam. Piemēram,
+              A1 ir nodaļas A speciālists 1. projektā.
+            </figcaption>
+          </figure>
+          <p>
+            <strong>Priekšrocība:</strong> nav raksturīgo darbinieku
+            aizvietošanas un atgriešanās problēmu, jo saikne ar
+            pamatorganizāciju saglabājas.
+          </p>
+          <p>
+            <strong>Trūkumi:</strong> dubulta pakļautība var radīt hierarhijas
+            pārkāpumus un konfliktus starp vadītājiem; atdeve un atbildības
+            izjūta var samazināties.
+          </p>
+          <p class="example">
+            <strong>Skaidrojošs piemērs.</strong> Projekta vadītājam speciālista
+            darbu vajag šodien, bet nodaļas vadītājam vienlaikus ir cits
+            steidzams uzdevums. Ja prioritātes nav saskaņotas, rodas konflikts.
+          </p>
+        </div>
+        <p class="source">Avots: 2 · 8.–9. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="citas-formas"
+        data-keywords="virtuālā birojs baseins"
+      >
+        <h2 tabindex="-1">
+          <span class="num">05</span>Citas organizācijas formas
+        </h2>
+        <div class="content">
+          <dl>
+            <dt>Virtuālā projektu organizācija</dt>
+            <dd>
+              Dalībnieku saziņā izmanto internetu; sadarbību var organizēt
+              attālināti.
+            </dd>
+            <dt>Projektu biroju organizācija</dt>
+            <dd>
+              Veido lieliem atsevišķiem projektiem vai kā kopīgu atbalsta
+              struktūru daudziem projektiem.
+            </dd>
+            <dt>Projektu baseina organizācija</dt>
+            <dd>
+              Pēc būtības ir vairāku projektu kopums, kuri organizēti tīrajā
+              formā.
+            </dd>
+          </dl>
+        </div>
+        <p class="source">Avots: 2 · 10. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="lomas"
+        data-keywords="uzdevuma devējs sponsors pasūtītājs uzraudzības komiteja klients piegādātājs nodevums robežstabs"
+      >
+        <h2 tabindex="-1">
+          <span class="num">06</span>Projekta institūcijas un lomas
+        </h2>
+        <div class="content">
+          <h3>Projekta vadītājs</h3>
+          <p>
+            Vada aktivitātes un nodrošina nodevumu pabeigšanu. Ikdienas darbā:
+          </p>
+          <ul>
+            <li>precizē projekta uzdevumu un mērķus;</li>
+            <li>
+              palīdz izveidot organizatorisko struktūru un informācijas plūsmas;
+            </li>
+            <li>izstrādā plānus un uzrauga to izpildi atbilstoši līgumam;</li>
+            <li>savlaicīgi atklāj novirzes un izstrādā korekcijas;</li>
+            <li>regulāri izvērtē projekta finansiālo izdevīgumu;</li>
+            <li>
+              robežstabos sagatavo situācijas ziņojumus un prezentē tos
+              uzraudzības komitejai;
+            </li>
+            <li>koordinē visu projekta uzdevumu izpildi.</li>
+          </ul>
+          <h3>Uzdevuma devējs un sponsors</h3>
+          <p>
+            <strong>Uzdevuma devējs</strong> atbild par stratēģiskiem
+            jautājumiem, uzņēmuma interešu ievērošanu, komandas atbalstu un
+            konfliktu risināšanu. Projekta izdošanās ir atkarīga arī no viņa un
+            projekta vadītāja sadarbības.
+          </p>
+          <p>
+            <strong>Sponsors</strong> virza un pamato projektu, atbalsta un
+            apstiprina resursus un aprīkojumu, pieņem augstākā līmeņa lēmumus un
+            risina jautājumus, ko projekta vadītājs nevar atrisināt. Šīs lomas
+            ir saistītas, taču materiālos tās nosauktas atsevišķi.
+          </p>
+          <h3>Uzraudzības komiteja</h3>
+          <ul>
+            <li>
+              Nosaka par projektu atbildīgās personas un pārbauda un pieņem
+              plānus.
+            </li>
+            <li>Seko mērķu sasniegšanai pieejamo resursu ietvaros.</li>
+            <li>
+              Pārbauda un pieņem fāžu rezultātus, starprezultātus un ziņojumus.
+            </li>
+            <li>Salīdzina ziņojumos norādīto ar projekta uzdevumu.</li>
+            <li>
+              Projekta noslēgumā atbrīvo projekta vadītāju no projekta
+              pienākumiem.
+            </li>
+          </ul>
+          <h3>Pārējie dalībnieki</h3>
+          <dl class="compact">
+            <dt>Vadības komiteja</dt>
+            <dd>
+              Ja izveidota, nodrošina augstākā līmeņa vadību un projekta
+              atbalstu.
+            </dd>
+            <dt>Projekta vadības komanda</dt>
+            <dd>Ja izveidota, palīdz projekta vadītājam vadības darbā.</dd>
+            <dt>Projekta komanda</dt>
+            <dd>Īsteno konkrētās aktivitātes.</dd>
+            <dt>Klients</dt>
+            <dd>Nosaka prasības un pieņem nodevumus.</dd>
+            <dt>Piegādātājs</dt>
+            <dd>Piegādā projektam resursus.</dd>
+            <dt>Projektu vadības birojs</dt>
+            <dd>
+              Var atbalstīt pārvaldību, apmācības, plānošanu un monitoringu.
+            </dd>
+          </dl>
+          <p class="key">
+            Vadītājs koordinē izpildi; uzdevuma devējs/sponsors nodrošina
+            stratēģisku atbalstu; komiteja pārbauda un pieņem.
+          </p>
+        </div>
+        <p class="source">Avots: 2 · 11.–13. lpp.; 3 · 7. lpp.</p>
+      </section>
+      <div class="group-title">Interesenti un SVID</div>
+      <section
+        class="chapter"
+        id="interesenti"
+        data-keywords="ieinteresētās puses mērķgrupa gala saņēmēji intereses"
+      >
+        <h2 tabindex="-1">
+          <span class="num">07</span>Interesenti un viņu analīze
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Interesenti jeb ieinteresētās puses</strong> ir personas,
+            grupas vai organizācijas, kurām ir interese par projektu, kuras
+            projekts ietekmē vai kuras pašas var ietekmēt projekta norisi.
+          </p>
+          <p>
+            Analīzes mērķis ir
+            <strong
+              >palielināt mērķgrupu un gala saņēmēju sociālos, ekonomiskos un
+              institucionālos ieguvumus</strong
+            >
+            un samazināt projekta iespējamo negatīvo ietekmi.
+          </p>
+          <ol>
+            <li><strong>Identificē:</strong> kas ir saistīts ar projektu?</li>
+            <li>
+              <strong>Atklāj intereses:</strong> ko katra puse sagaida, kādi ir
+              tās mērķi un kā projekta specifika to skar?
+            </li>
+            <li>
+              <strong>Novērtē:</strong> cik liela ir tās ietekme un
+              ieinteresētība?
+            </li>
+            <li>
+              <strong>Izvēlies sadarbību:</strong> iesaistīšana, konsultēšanās,
+              informēšana vai uzraudzīšana.
+            </li>
+          </ol>
+          <p class="example">
+            <strong>Skaidrojošs piemērs.</strong> Rotaļlaukuma projektā
+            pašvaldība var piešķirt resursus un atļaujas, vecāki ir ieinteresēti
+            drošībā, bet tuvējie iedzīvotāji var raizēties par troksni. Visām
+            pusēm neder vienāda saziņa.
+          </p>
+          <p>
+            Vienkāršā analīzes tabulā pietiek sākumā pierakstīt:
+            <strong
+              >interesents → intereses/mērķi → projekta specifika attiecībā uz
+              šo pusi</strong
+            >.
+          </p>
+        </div>
+        <p class="source">Avots: 3 · 2.–4., 6.–8. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="interesentu-matrica"
+        data-keywords="ietekme interese matrica galvenie spēlētāji ietekmīgie skartie"
+      >
+        <h2 tabindex="-1">
+          <span class="num">08</span>Ietekmes un intereses matrica
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Ietekme</strong> rāda spēju mainīt projekta norisi, bet
+            <strong>interese</strong> — cik svarīgs projekts ir konkrētajai
+            pusei. Matrica palīdz sadalīt uzmanību.
+          </p>
+          <div
+            class="matrix"
+            role="group"
+            aria-label="Interesentu ietekmes un intereses matrica"
+          >
+            <div class="axis">Augsta ietekme · zema interese</div>
+            <div class="axis">Augsta ietekme · augsta interese</div>
+            <div>
+              <strong>Ietekmīgie</strong><br />Uzturi labas attiecības,
+              konsultējies un palielini iesaisti.
+            </div>
+            <div>
+              <strong>Galvenie spēlētāji</strong><br />Cieši vadi, regulāri
+              iesaisti un iekļauj lēmumu pieņemšanā.
+            </div>
+            <div class="axis">Zema ietekme · zema interese</div>
+            <div class="axis">Zema ietekme · augsta interese</div>
+            <div>
+              <strong>„Ieinteresētie”*</strong><br />Uzraugi; izmanto vispārējus
+              informēšanas kanālus.
+            </div>
+            <div>
+              <strong>Skartie</strong><br />Informē, konsultējies un iesaisti
+              zema riska jomās.
+            </div>
+          </div>
+          <p>
+            Skartie var kļūt par atbalstītājiem un labas gribas vēstniekiem.
+            Ietekmīgos vēlams vairāk ieinteresēt, lai viņi kļūtu par galvenajiem
+            spēlētājiem.
+          </p>
+          <p class="note">
+            * Materiāla 9.–10. lpp. zemās ietekmes un zemās intereses grupas
+            nosaukums ir „Ieinteresētie”. Tas var mulsināt; iegaumē tieši
+            <strong>asu vērtības un atbilstošo rīcību</strong>. 10. lpp.
+            noslēguma frāze par šīs grupas pārvēršanu par „Ieinteresētajiem” ir
+            atkārtojums; tās jēga konspektā izteikta kā ieinteresētības
+            palielināšana.
+          </p>
+        </div>
+        <p class="source">Avots: 3 · 5., 9.–10. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="svid"
+        data-keywords="SWOT stiprās vājās iespējas draudi iekšējā ārējā vide"
+      >
+        <h2 tabindex="-1"><span class="num">09</span>SVID analīze</h2>
+        <div class="content">
+          <p>
+            SVID palīdz izvērtēt organizācijas iekšējos un ārējos apstākļus
+            saistībā ar projektu.
+          </p>
+          <dl>
+            <dt>S — stiprās puses (Strengths)</dt>
+            <dd>
+              <strong>Iekšējie</strong> labvēlīgie faktori: ko organizācija var
+              dot projektam, piemēram, pieredzējušu komandu?
+            </dd>
+            <dt>V — vājās puses (Weaknesses)</dt>
+            <dd>
+              <strong>Iekšējie</strong> traucējošie faktori: kas organizācijā
+              var kavēt izpildi, piemēram, pieredzes trūkums?
+            </dd>
+            <dt>I — iespējas (Opportunities)</dt>
+            <dd>
+              <strong>Ārējie</strong> labvēlīgie apstākļi un iespējamie
+              paliekošie labumi.
+            </dd>
+            <dt>D — draudi (Threats)</dt>
+            <dd>
+              <strong>Ārējie</strong> apstākļi, kuri var apdraudēt veiksmīgu
+              īstenošanu.
+            </dd>
+          </dl>
+          <p>
+            Materiāla krustojumu shēmā
+            <strong>stiprās puses + iespējas</strong> ir sekmīgas izmantošanas
+            situācija. <strong>Stiprās puses + draudi</strong> un
+            <strong>vājās puses + iespējas</strong> prasa rūpīgu apsvēršanu.
+            <strong>Vājās puses + draudi</strong> veido īpaši apdraudošu
+            kombināciju.
+          </p>
+          <p class="key">
+            S un V — organizācijas iekšienē; I un D — ārējā vidē.
+          </p>
+        </div>
+        <p class="source">Avots: 3 · 11.–12. lpp.</p>
+      </section>
+      <div class="group-title">Riski un izmaiņas</div>
+      <section
+        class="chapter"
+        id="risks-un-vide"
+        data-keywords="risku analīze risks definīcija vide ārējie iekšējie alternatīvas"
+      >
+        <h2 tabindex="-1">
+          <span class="num">10</span>Risks, risku vadība un projekta vide
+        </h2>
+        <div class="content">
+          <p>
+            Materiālā <strong>risks</strong> ir neparedzēta situācija vai
+            notikums, kas var negatīvi ietekmēt projektu vai tā daļu un kavēt
+            kopējo mērķu sasniegšanu. Risku vērtē arī tad, kad salīdzina
+            alternatīvus risinājumus.
+          </p>
+          <p>
+            <strong>Risku vadība</strong> ietver risku identificēšanu, grupēšanu
+            un analīzi, kā arī reakciju plānošanu, uzraudzību un kontroli.
+            Apraksta faktorus, kuri var ietekmēt atbilstību prasībām, izmaksas
+            vai termiņus.
+          </p>
+          <h3>Kur meklēt risku avotus?</h3>
+          <ul>
+            <li>
+              <strong>Ārējā vidē:</strong> sociālie, psiholoģiskie, politiskie,
+              ekonomiskie, ģeofiziskie un ekoloģiskie faktori.
+            </li>
+            <li>
+              <strong>Iekšējā vidē:</strong> projekta organizācija, dalībnieki
+              un komanda.
+            </li>
+          </ul>
+          <p>
+            Risku vadīšanas nepieciešamību un apjomu izvērtē pēc
+            <strong
+              >finansēšanas avota, projekta lieluma, sarežģītības un pašiem
+              riskiem</strong
+            >.
+          </p>
+          <p class="key">
+            Risks vēl var iestāties. Analīzē jautā: kas var notikt, kāpēc un ko
+            tas mainīs projektā?
+          </p>
+        </div>
+        <p class="source">Avots: 3 · 14.–17., 25. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="risku-veidi"
+        data-keywords="finanšu operacionālā reputācijas juridiskā cilvēkresursi plānošana izpilde noslēgums"
+      >
+        <h2 tabindex="-1">
+          <span class="num">11</span>Risku piemēri projekta posmos
+        </h2>
+        <div class="content">
+          <p>
+            Riskus meklē <strong>visā projekta gaitā</strong>. Zemāk materiāla
+            piemēri sakārtoti pēc posmiem, kuros tos īpaši svarīgi pamanīt;
+            viens risks var skart vairākus posmus.
+          </p>
+          <h3>Sagatavošanā un plānošanā</h3>
+          <ul>
+            <li>Neskaidri vai neprecīzi definēti mērķi.</li>
+            <li>Nepietiekami resursi vai nepareizs to sadalījums.</li>
+            <li>Neprecīzas izmaksu aplēses un budžeta pārtēriņš.</li>
+            <li>
+              Tehnoloģiski sarežģījumi, mainīgas atbilstības prasības un
+              atkarība no piegādātājiem.
+            </li>
+          </ul>
+          <h3>Izpildē</h3>
+          <ul>
+            <li>Kvalitātes kontroles kļūmes un nepietiekama testēšana.</li>
+            <li>Programmatūras, aparatūras vai integrācijas problēmas.</li>
+            <li>Ieinteresēto pušu domstarpības un pretestība izmaiņām.</li>
+            <li>Juridiski jautājumi, prasību izmaiņas un līgumiski strīdi.</li>
+          </ul>
+          <h3>Pabeigšanā un pieņemšanā</h3>
+          <ul>
+            <li>Nepilnīgi nodevumi vai neatbilstība kvalitātes standartiem.</li>
+            <li>Gala rezultāta pieņemšanas kavēšanās vai strīdi.</li>
+            <li>Neparedzēti izmaiņu pieprasījumi.</li>
+            <li>
+              Nepietiekama dokumentācija, kas apgrūtina mērķu izpildes
+              pierādīšanu.
+            </li>
+          </ul>
+          <h3>Kādas sekas vērtē?</h3>
+          <dl class="compact">
+            <dt>Finansiālās</dt>
+            <dd>
+              Iespējamie naudas zaudējumi vai ieguvumi; materiāla riska
+              definīcija uzsver negatīvo ietekmi.
+            </dd>
+            <dt>Operacionālās</dt>
+            <dd>Ietekme uz ikdienas darbu, ražošanu un piegādēm.</dd>
+            <dt>Reputācijas</dt>
+            <dd>Uzticības un publiskā tēla pasliktināšanās.</dd>
+            <dt>Juridiskās</dt>
+            <dd>Neatbilstība prasībām, tiesvedība vai sodi.</dd>
+            <dt>Cilvēkresursu</dt>
+            <dd>Ietekme uz darbiniekiem, apmierinātību un produktivitāti.</dd>
+          </dl>
+        </div>
+        <p class="source">Avots: 3 · 15., 18.–21. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="risku-novertesana"
+        data-keywords="varbūtība iespējamība ietekme riska pakāpe skala novērtējums prioritāte"
+      >
+        <h2 tabindex="-1"><span class="num">12</span>Risku novērtēšana</h2>
+        <div class="content">
+          <p>
+            Risku vērtē divās dimensijās:
+            <strong>iestāšanās varbūtība</strong> un <strong>ietekme</strong>.
+            Liela varbūtība ar lielu ietekmi prasa īpašu uzmanību. Arī maz
+            ticams notikums var būt nozīmīgs, ja sekas ir smagas.
+          </p>
+          <h3>Varbūtības skala materiālā</h3>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Vērtība un apzīmējums</th>
+                <th scope="col">Iespējamība</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>5</strong> — gandrīz droša</td>
+                <td>&gt; 70%</td>
+              </tr>
+              <tr>
+                <td><strong>4</strong> — ticama</td>
+                <td>50–70%</td>
+              </tr>
+              <tr>
+                <td><strong>3</strong> — iespējama</td>
+                <td>30–50%</td>
+              </tr>
+              <tr>
+                <td><strong>2</strong> — maz ticama</td>
+                <td>5–30%</td>
+              </tr>
+              <tr>
+                <td><strong>1</strong> — gandrīz neiespējama</td>
+                <td>0–5%</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="note">
+            Tā ir slaida piemēra skala. Robežvērtības slaidā pārklājas;
+            praktiskā novērtējumā vienojas par nepārprotamu intervālu lietojumu.
+          </p>
+          <p>
+            Ietekmi var vērtēt ar līmeņiem, piemēram, zema, vidēja, augsta, vai
+            ar skaitļiem. Materiāla riska reģistra piemērā
+            <strong>novērtējums = ietekmes vērtība × varbūtības vērtība</strong
+            >: 4 × 3 = 12; 5 × 2 = 10. Tas ir prioritāšu rādītājs izvēlētajā
+            skalā, nevis zaudējumu summa.
+          </p>
+          <p class="note">
+            22. lpp. matricā skaitļi 1–5 apzīmē izvietotos risku piemērus; tos
+            nevajag sajaukt ar 23. lpp. varbūtības skalas vērtībām.
+          </p>
+          <h3>Trīs analīzes jautājumi</h3>
+          <ol>
+            <li>Kā risks var ietekmēt projektu?</li>
+            <li>Vai riska pakāpe ir pieļaujama?</li>
+            <li>
+              Kādus pretpasākumus paredzēt, ja tas iestājas, un cik elastīgs ir
+              projekts?
+            </li>
+          </ol>
+        </div>
+        <p class="source">Avots: 3 · 22.–23., 30.–31. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="risku-reakcijas"
+        data-keywords="pieņemšana samazināšana pārnešana dalīšana izvairīšanās pretpasākumi"
+      >
+        <h2 tabindex="-1">
+          <span class="num">13</span>Četras reakcijas uz risku
+        </h2>
+        <div class="content">
+          <dl>
+            <dt>1. Riska pieņemšana</dt>
+            <dd>
+              Neievieš papildu mazināšanas pasākumus, bet turpina uzraudzīt
+              risku. Ja tas iestājas, var izmantot standarta procesus un
+              procedūras.
+            </dd>
+            <dt>2. Riska samazināšana</dt>
+            <dd>
+              Ievieš papildu mazināšanas un kontroles pasākumus, strādā ar riska
+              cēloni un samazina iestāšanās varbūtību.
+            </dd>
+            <dt>3. Riska pārnešana vai dalīšana</dt>
+            <dd>
+              Atbildību par riska sekām pilnībā vai daļēji nodod trešajai pusei,
+              piemēram, ar apdrošināšanu vai ārpakalpojuma līgumu. Slaidā to
+              raksturo kā ietekmes nosacītu samazināšanu.
+            </dd>
+            <dt>4. Izvairīšanās no riska</dt>
+            <dd>
+              Neuzsāk vai pārtrauc darbību, kas izraisa vai palielina risku.
+              Jārēķinās, ka pilnīga atteikšanās izslēdz arī iespējamos ieguvumus
+              no šīs darbības.
+            </dd>
+          </dl>
+          <p>
+            Materiāla shēma saista
+            <strong>mazu varbūtību un mazu ietekmi</strong> ar pieņemšanu;
+            <strong>lielu varbūtību un mazu ietekmi</strong> — ar samazināšanu;
+            <strong>mazu varbūtību un lielu ietekmi</strong> — ar
+            pārnešanu/dalīšanu;
+            <strong>lielu varbūtību un lielu ietekmi</strong> — ar izvairīšanos.
+          </p>
+          <p class="example">
+            <strong>Skaidrojošs piemērs.</strong> Aprīkojuma bojājuma riskam var
+            paredzēt apkopi (samazināšana), apdrošināšanu (pārnešana) vai
+            atteikties no bīstamās tehnoloģijas (izvairīšanās).
+          </p>
+        </div>
+        <p class="source">Avots: 3 · 24. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="risku-plans"
+        data-keywords="metodoloģija budžets regularitāte atbildīgais risku analītiķis"
+      >
+        <h2 tabindex="-1">
+          <span class="num">14</span>Risku vadīšanas plāns un atbildība
+        </h2>
+        <div class="content">
+          <h3>Plāna saturs</h3>
+          <ul>
+            <li>Metodoloģija: kā riskus identificēs un vadīs.</li>
+            <li>Lomas un atbildības.</li>
+            <li>Risku vadīšanas budžets.</li>
+            <li>Darbību izpildes regularitāte.</li>
+            <li>Aprēķināšanas un novērtēšanas metodes.</li>
+            <li>Atskaišu un uzskaites formas.</li>
+          </ul>
+          <h3>Atbildības sadalījums materiāla piemērā</h3>
+          <dl>
+            <dt>Pasūtītājs un finansētājs</dt>
+            <dd>
+              Pieņem lēmumu par risku vadīšanas plānošanu un piedalās risku
+              identificēšanā.
+            </dd>
+            <dt>Projekta vadītājs</dt>
+            <dd>
+              Atbild un piedalās identificēšanā, analīzē un plānošanā; atbild
+              par risku uzraudzību, kontroli un pieredzes apkopošanu.
+            </dd>
+            <dt>Risku analītiķis</dt>
+            <dd>
+              Izpilda identificēšanas, analīzes, plānošanas un pieredzes
+              apkopošanas darbus.
+            </dd>
+            <dt>Komandas dalībnieks</dt>
+            <dd>
+              Piedalās identificēšanā un daļēji veic pieredzes apkopošanu.
+            </dd>
+          </dl>
+          <p class="key">
+            „Atbild” un „izpilda” nav viens un tas pats: vadītājs saglabā
+            atbildību arī tad, ja analīzi veic analītiķis.
+          </p>
+        </div>
+        <p class="source">Avots: 3 · 27.–28. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="risku-registrs"
+        data-keywords="reģistrs ID risku uzskaite rezerves sadarbība plānošanas riski"
+      >
+        <h2 tabindex="-1">
+          <span class="num">15</span>Risku reģistrs un plānošanas riski
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Risku reģistrs</strong> ir strukturēta uzskaite:
+            <strong
+              >ID, risks, apraksts un ietekme, ietekmes vērtējums, varbūtība,
+              kopējais novērtējums, reakcija, atbildīgais</strong
+            >. Riskus var grupēt, piemēram, finanšu un tehnoloģiskajos.
+          </p>
+          <div class="example">
+            <strong>Vienkāršots materiāla piemērs</strong>
+            <dl class="compact">
+              <dt>Risks</dt>
+              <dd>
+                Neprecīza izmaksu prognoze; projekta īstenošanai var vajadzēt
+                papildu finansējumu.
+              </dd>
+              <dt>Novērtējums</dt>
+              <dd>
+                Ietekme 4 (būtiska) × iespējamība 3 (iespējama) =
+                <strong>12</strong>.
+              </dd>
+              <dt>Reakcija</dt>
+              <dd>
+                Elastīga prognoze, rezerves scenāriji, regulāra uzraudzība,
+                iepriekšējo projektu izpēte, budžeta rezerve vai fiksētas cenas
+                līgums.
+              </dd>
+              <dt>Atbildīgais</dt>
+              <dd>Projekta vadītājs.</dd>
+            </dl>
+          </div>
+          <h3>Plānošanā īpaši svarīgi</h3>
+          <ul>
+            <li>
+              <strong>Pasūtītājs nepietiekami piedalās.</strong> Materiāls
+              paredz laika un resursu rezerves; tā kā seku mazināšana ir
+              ierobežota, jāmazina pati notikuma varbūtība. Piemērā minēts arī
+              autoritatīvs vadības stils un uzspiests komandas darbs.
+            </li>
+            <li>
+              <strong>Dalībnieki nepietiekami sadarbojas.</strong> Paredz
+              rezerves, bet galveno uzmanību velta riska iestāšanās novēršanai.
+            </li>
+            <li>
+              <strong>Netiek ievērotas projekta vadības prasības.</strong>
+              Materiāls uzsver notikuma varbūtības novēršanu, jo seku mazināšana
+              šajā piemērā nav iespējama.
+            </li>
+          </ul>
+          <p class="key">
+            Rezerve palīdz tikt galā ar sekām. Darbs ar cēloņiem palīdz novērst
+            pašu notikumu.
+          </p>
+        </div>
+        <p class="source">Avots: 3 · 29., 31. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="izmainas"
+        data-keywords="izmaiņu pieprasījums satura izmaiņas apjoms dokumentācija"
+      >
+        <h2 tabindex="-1">
+          <span class="num">16</span>Projekta satura izmaiņu vadība
+        </h2>
+        <div class="content">
+          <p>Riska iestāšanās var radīt vajadzību mainīt projekta saturu:</p>
+          <ul>
+            <li>
+              mainīt rezultāta īpašības vai prasības, saglabājot projekta mērķi;
+            </li>
+            <li>
+              paplašināt vai sašaurināt saturu, kas ietekmē termiņus un
+              izmaksas.
+            </li>
+          </ul>
+          <p>
+            Izmaiņu pamats ir <strong>izmaiņu pieprasījums</strong>. Tajā pamato
+            nepieciešamību, apraksta izmaiņu saturu un īstenošanas veidu.
+            Attiecīgās izmaiņas atspoguļo projekta dokumentācijā.
+          </p>
+          <p class="example">
+            <strong>Skaidrojošs piemērs.</strong> Ja iecerētais aprīkojums nav
+            pieejams, var mainīt tehnisko risinājumu. Joprojām jāsasniedz tas
+            pats mērķis, bet jāpārskata prasības, izmaksas un termiņi.
+          </p>
+        </div>
+        <p class="source">Avots: 3 · 26. lpp.</p>
+      </section>
+      <div class="group-title">Koncepts, laiks un izmaksas</div>
+      <section
+        class="chapter"
+        id="koncepts"
+        data-keywords="spriedzes trīsstūris trijstūris kvalitāte prasības produkts laiks izmaksas koncepts"
+      >
+        <h2 tabindex="-1">
+          <span class="num">17</span>Projekta koncepts un spriedzes trijstūris
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Projekta risinājuma koncepts</strong> apraksta trīs
+            savstarpēji saistītus elementus:
+            <strong>prasības produktam, laiku un izmaksas</strong>. Materiāla
+            „3” spriedzes trijstūrī virsotnes nosauktas par
+            <strong>kvalitāti, izmaksām un laiku</strong>.
+          </p>
+          <p>
+            Abi attēlojumi atgādina vienu saistību: izmaiņas vienā elementā liek
+            pārskatīt pārējos. Piemēram, lielākam prasību apjomam var būt
+            vajadzīgs ilgāks laiks vai lielāks budžets; steidzamāks termiņš var
+            palielināt izmaksas.
+          </p>
+          <p class="key">
+            Ko iegūsim? → Kas un cik ilgi jādara? → Cik tas maksās?
+          </p>
+          <p class="note">
+            Prasības produktam un kvalitāte ir saistītas, tomēr nav pilnīgi
+            identiski jēdzieni. Konspektā saglabāti abu materiālu lietotie
+            formulējumi.
+          </p>
+        </div>
+        <p class="source">Avots: 3 · 13. lpp.; 3.2 · 2.–3. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="produkta-prasibas"
+        data-keywords="kas cik daudz kvantificēšana gala produkts nodevums skice makets prasību apraksts"
+      >
+        <h2 tabindex="-1">
+          <span class="num">18</span>Gala produkta prasību definēšana
+        </h2>
+        <div class="content">
+          <ol>
+            <li>
+              <strong>Vienā teikumā</strong> pasaki, kāds būs gala rezultāts.
+            </li>
+            <li>Sadali rezultātu <strong>sastāvdaļās</strong>.</li>
+            <li>
+              Katrai nosauc <strong>kas?</strong> un
+              <strong>cik daudz?</strong> — vienības, skaitu, platību, apjomu
+              vai citu pārbaudāmu raksturlielumu.
+            </li>
+          </ol>
+          <p>
+            Apraksta veidošanai palīdz skice, makets, prāta karte vai objekta
+            struktūrshēma. Pēc tam sastāvdaļas sakārto tabulā vai skaidrā
+            uzskaitījumā.
+          </p>
+          <p class="key">
+            Produkta prasības apraksta iegūstamo rezultātu, nevis darbību
+            sarakstu.
+          </p>
+          <div class="example">
+            <strong>Piemērs no materiāla: regulējamas gājēju pārejas</strong>
+            <p>
+              Gala rezultāts: sešu demontētu neregulējamu pāreju vietā ir jaunas
+              pārejas ar regulējamiem luksoforiem.
+            </p>
+            <ul>
+              <li>12 luksofori un 12 gājēju pārejas ceļa zīmes.</li>
+              <li>6 saskaņojumi ar LVC.</li>
+              <li>6 pārejas ar atjaunotu segumu 120 m² platībā.</li>
+              <li>Balti horizontālie apzīmējumi 60 m² platībā.</li>
+            </ul>
+            <p>
+              <strong>Prasība:</strong> „12 uzstādīti luksofori.”
+              <strong>Darbs laika plānā:</strong> „Luksoforu uzstādīšana.”
+            </p>
+          </div>
+          <p>
+            Citi materiāla piemēri rāda, ka rezultāts var būt arī digitāla
+            platforma, rokasgrāmata, apmācību materiāli, aprīkotas telpas,
+            labiekārtota teritorija vai projekta ietvaros sagatavots uzņēmums.
+            Kvantificē arī šādus rezultātus: piemēram, moduļu skaitu, materiālu
+            skaitu vai telpu platību.
+          </p>
+          <p>
+            Produkta apraksts ir pamats gan veicamo darbu noteikšanai, gan
+            izmaksu pozīcijām. Ja aprakstā ir telpas, aprīkojums vai apmācības,
+            to radīšanai nepieciešamie darbi un izmaksas jāparedz plānā.
+          </p>
+        </div>
+        <p class="source">Avots: 3.2 · 4.–16., 51. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="laika-planosana"
+        data-keywords="laika grafiks ilgums darba dienas kalendārs fāzes Ilmete robežstabi termiņi"
+      >
+        <h2 tabindex="-1">
+          <span class="num">19</span>Projekta laika noteikšana un fāzes
+        </h2>
+        <div class="content">
+          <ol>
+            <li>Nosaka veicamos darbus <strong>pa fāzēm</strong>.</li>
+            <li>
+              Katram darbam nosaka ilgumu <strong>darba dienās</strong>.
+              Materiāla uzdevumā minimālais ilgums ir <strong>1 diena</strong>.
+            </li>
+            <li>Nosaka projekta sākuma datumu.</li>
+            <li>
+              Beigu datumu nosaka pēc darba kalendāra, ievērojot brīvdienas,
+              Latvijas svētku dienas un pārceltās darba dienas.
+            </li>
+          </ol>
+          <p class="key">
+            Ilgums nav datums: „5 darba dienas” raksturo darba ilgumu; sākuma un
+            beigu datumi ir termiņi kalendārā.
+          </p>
+          <h3>Fāzu integrētais modelis pēc prof. Ž. Ilmetes metodoloģijas</h3>
+          <ol class="phase-list">
+            <li>
+              <strong>Starts un plānošana</strong> — sagatavo projekta vadības
+              pamatu.
+            </li>
+            <li>
+              <strong>Priekšizpēte</strong> — izpēta esošo situāciju un
+              iespējas.
+            </li>
+            <li>
+              <strong>Pamatkoncepcija</strong> — izvēlas ieceri un nosaka
+              prasības.
+            </li>
+            <li>
+              <strong>Detaļkoncepcija</strong> — sagatavo detalizētas
+              specifikācijas un dokumentus.
+            </li>
+            <li>
+              <strong>Īstenošana</strong> — izgatavo, izstrādā, iegādājas un
+              uzstāda.
+            </li>
+            <li><strong>Ieviešana</strong> — pārbauda un sāk lietošanu.</li>
+            <li>
+              <strong>Noslēgums</strong> — nodod rezultātu un slēdz projektu.
+            </li>
+          </ol>
+          <p>
+            Darbu un termiņu tabulā katrai fāzei norāda darbus, to ilgumu un
+            fāzes sākuma un beigu termiņus. Materiāla piemēros fāžu beigās
+            redzamas arī starpatskaites un lēmumi par pāreju uz nākamo fāzi.
+          </p>
+          <p class="note">
+            Fāžu konkrētais saturs jāpielāgo projektam. Būvniecības, IT un
+            izglītības projektā darbu saraksti atšķirsies.
+          </p>
+        </div>
+        <p class="source">Avots: 3.2 · 17.–18., 26.–35. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="starts-izpete"
+        data-keywords="starta fāze plānošanas fāze izpēte priekšizpēte rokasgrāmata robežstabs"
+      >
+        <h2 tabindex="-1">
+          <span class="num">20</span>Starts, plānošana un priekšizpēte
+        </h2>
+        <div class="content">
+          <h3>Starts un plānošana: kā organizēsim projektu?</h3>
+          <p>Šīs fāzes standartizētie darbi:</p>
+          <ul>
+            <li>projekta starta organizēšana un norise;</li>
+            <li>struktūras, gaitas un termiņu plānošana;</li>
+            <li>resursu, izmaksu un finanšu plānošana;</li>
+            <li>robežstabu plānošana;</li>
+            <li>projekta rokasgrāmatas sagatavošana un noformēšana.</li>
+          </ul>
+          <p>
+            <strong>Robežstabs</strong> ir svarīgs projekta progresa vai
+            rezultāta pārbaudes punkts; pie tā var sniegt ziņojumu un pieņemt
+            lēmumu par tālāko gaitu.
+          </p>
+          <h3>Priekšizpēte: kāda ir situācija un iespējas?</h3>
+          <ul>
+            <li>
+              <strong>Objekts un procesi:</strong> potenciālās vietas, telpu,
+              ēku vai zemes izmantošanas iespējas, esošā objekta tehniskais
+              stāvoklis; uzņēmuma procesi, tehniskais nodrošinājums un IT
+              sistēmas.
+            </li>
+            <li>
+              <strong>Tirgus un cilvēki:</strong> klienti, lietotāji un
+              interesenti; līdzīgi risinājumi, konkurenti; darbaspēka tirgus vai
+              esošā personāla novērtējums.
+            </li>
+            <li>
+              <strong>Partneri:</strong> potenciālie darbu izpildītāji,
+              piegādātāji un pakalpojumu sniedzēji.
+            </li>
+            <li>
+              <strong>Prasību vide:</strong> jomas normatīvie akti,
+              uzņēmējdarbības formas, uzņēmuma veidošanas iespējas vai juridiskā
+              statusa izmaiņas.
+            </li>
+            <li>
+              <strong>Informēšana:</strong> reklāmas, digitālā mārketinga un
+              sabiedrības informēšanas iespējas.
+            </li>
+          </ul>
+          <p class="key">
+            Priekšizpētē pēta un analizē. Vēlākajās fāzēs no iegūtās
+            informācijas veido prasības un specifikācijas.
+          </p>
+        </div>
+        <p class="source">Avots: 3.2 · 19.–20. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="koncepciju-fazes"
+        data-keywords="pamatkoncepcija detaļkoncepcija specifikācijas prasības nolikums cenu aptauja"
+      >
+        <h2 tabindex="-1">
+          <span class="num">21</span>Pamatkoncepcija un detaļkoncepcija
+        </h2>
+        <div class="content">
+          <h3>Pamatkoncepcija: ko izvēlamies un kādas ir prasības?</h3>
+          <ul>
+            <li>
+              Nosaka objekta vietu vai prasības telpām, ēkai un zemei; esošam
+              objektam sagatavo tehniskā stāvokļa aktu un vajadzīgo izmaiņu
+              sarakstu.
+            </li>
+            <li>
+              Nosaka procesu izmaiņu, tehniskā aprīkojuma un IT sistēmu
+              prasības.
+            </li>
+            <li>
+              Nosaka mērķauditoriju un izstrādā gala produkta konceptu, tostarp
+              skici vai shēmu.
+            </li>
+            <li>
+              Nosaka prasības darbu izpildītājiem, piegādātājiem un pakalpojumu
+              sniedzējiem.
+            </li>
+            <li>
+              Apkopo normatīvās prasības; izvēlas uzņēmējdarbības formu vai
+              apkopo juridiskā statusa izmaiņas.
+            </li>
+            <li>
+              Nosaka personāla skaitu, kvalifikāciju vai kompetences
+              paaugstināšanas prasības.
+            </li>
+            <li>
+              Izstrādā reklāmas, digitālā mārketinga vai sabiedrības
+              informēšanas koncepciju.
+            </li>
+          </ul>
+          <h3>Detaļkoncepcija: kā prasības pārvērš izpildāmos dokumentos?</h3>
+          <ul>
+            <li>
+              Sagatavo zemes, ēkas vai telpu pirkuma vai nomas līguma projektu.
+            </li>
+            <li>Izstrādā darba uzdevumus projektētājiem.</li>
+            <li>
+              Sagatavo materiālu, procesu optimizācijas, aprīkojuma un gala
+              produkta specifikācijas.
+            </li>
+            <li>
+              Sagatavo konkursu nolikumus vai cenu aptauju dokumentāciju un
+              līgumu projektus darbu veicējiem, piegādātājiem un pakalpojumu
+              sniedzējiem.
+            </li>
+            <li>
+              Izstrādā amata aprakstus, darba līgumu projektus vai personāla
+              kompetences paaugstināšanas specifikācijas.
+            </li>
+            <li>
+              Sagatavo uzņēmuma dibināšanas vai juridiskā statusa izmaiņu
+              dokumentāciju.
+            </li>
+          </ul>
+          <p class="key">
+            Pamatkoncepcija — prasības un izvēlētais risinājums. Detaļkoncepcija
+            — specifikācijas, darba uzdevumi un dokumentu projekti.
+          </p>
+          <p class="example">
+            <strong>Skaidrojošs piemērs.</strong> Pamatkoncepcijā nosaka, kādas
+            telpas nepieciešamas; detaļkoncepcijā sagatavo konkrētā nomas līguma
+            projektu; īstenošanā līgumu noslēdz.
+          </p>
+        </div>
+        <p class="source">Avots: 3.2 · 21.–22. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="istenosana-ieviesana"
+        data-keywords="īstenošana realizācija ieviešana ekspluatācija testēšana prototips pilotieviešana"
+      >
+        <h2 tabindex="-1">
+          <span class="num">22</span>Īstenošana un ieviešana
+        </h2>
+        <div class="content">
+          <h3>Īstenošana: izveido paredzēto rezultātu</h3>
+          <ul>
+            <li>
+              Reģistrē uzņēmumu vai tā izmaiņas Uzņēmumu reģistrā un citās
+              vajadzīgajās instancēs.
+            </li>
+            <li>Saskaņo un noslēdz pirkuma vai nomas līgumus.</li>
+            <li>
+              Izsludina un organizē konkursus/cenu aptaujas; slēdz līgumus ar
+              darbu veicējiem, piegādātājiem un pakalpojumu sniedzējiem.
+            </li>
+            <li>
+              Izstrādā, testē un apstiprina prototipu; izstrādā IT sistēmas,
+              lietotnes un lietotāju dokumentāciju.
+            </li>
+            <li>
+              Veic projektēšanu, būvniecību, atjaunošanu, rekonstrukciju vai
+              remontu un teritorijas labiekārtošanu.
+            </li>
+            <li>
+              Izgatavo vai piegādā, montē, uzstāda un izvieto vispārējo un
+              tehnisko aprīkojumu.
+            </li>
+            <li>Organizē personāla atlasi un pieņem darbā.</li>
+            <li>
+              Sagatavo reklāmas materiālus un digitālās kampaņas, izstrādā
+              produkta vai pakalpojuma piedāvājumu paketes.
+            </li>
+          </ul>
+          <h3>Ieviešana: nodrošina gatavību lietošanai</h3>
+          <ul>
+            <li>Pārbauda, testē un regulē aprīkojumu un iekārtas.</li>
+            <li>Testē IT sistēmas, labo kļūdas un palaiž tās lietošanā.</li>
+            <li>Nodod iekārtas un objektu ekspluatācijā.</li>
+            <li>Apmāca lietotājus un personālu.</li>
+            <li>Veic eksperimentālo ražošanu un pilotieviešanu.</li>
+            <li>
+              Izplata reklāmas materiālus, īsteno digitālās kampaņas un organizē
+              atklāšanu.
+            </li>
+          </ul>
+          <p class="key">
+            Īstenošana — radām un sagādājam. Ieviešana — pārbaudām, apmācām un
+            sākam izmantot.
+          </p>
+          <p class="note">
+            Testēšana materiālā ir abās fāzēs: īstenošanā testē arī prototipu;
+            ieviešanā pārbauda gatavā risinājuma darbību un lietošanas gatavību.
+          </p>
+        </div>
+        <p class="source">Avots: 3.2 · 23.–24. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="noslegums"
+        data-keywords="slēgšana noslēgums pēckalkulācija gala atskaite pieredze izformēšana"
+      >
+        <h2 tabindex="-1"><span class="num">23</span>Projekta noslēgums</h2>
+        <div class="content">
+          <p>
+            Noslēgums nav tikai pēdējā darba pabeigšana. Tajā formāli nodod
+            rezultātu un sakārto projekta saistības un pieredzi.
+          </p>
+          <ul>
+            <li>Projekta nodošana un pieņemšana.</li>
+            <li>
+              Faktisko izmaksu <strong>pēckalkulācija</strong> — aprēķins pēc
+              izpildes.
+            </li>
+            <li>Pieredzes apkopošana.</li>
+            <li>Gala atskaites sagatavošana.</li>
+            <li>Noslēguma sanāksme.</li>
+            <li>Dokumentācijas sakārtošana un nodošana.</li>
+            <li>Komandas izformēšana.</li>
+          </ul>
+          <p>
+            Uzraudzības komitejas lomā materiāls paredz arī projekta vadītāja
+            atbrīvošanu projekta noslēgumā.
+          </p>
+        </div>
+        <p class="source">Avots: 3.2 · 25. lpp.; 2 · 13. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="izmaksu-struktura"
+        data-keywords="Investment costs IC investīcijas rezerve neparedzētie 10 20 35 25 75 budžets"
+      >
+        <h2 tabindex="-1">
+          <span class="num">24</span>Projekta izmaksas un to struktūra
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Projekta izmaksas (Investment costs, IC)</strong> ir kopējie
+            ieguldījumi projekta vadīšanā un produkta/pakalpojuma izveidē un
+            ieviešanā.
+          </p>
+          <p>
+            Pirmsprojekta fāzes novērtējums ir vispārināts un lielā mērā balstās
+            pieņēmumos. Materiālā norādītais sākotnējā novērtējuma precizitātes
+            diapazons ir <strong>−25% līdz +75%</strong>.
+          </p>
+          <h3>Trīs izmaksu daļas</h3>
+          <ol>
+            <li>
+              <strong>Projekta vadīšana.</strong> Materiālā norādīts aptuvens
+              īpatsvars <strong>10–35%</strong>.
+            </li>
+            <li>
+              <strong>Produkta/pakalpojuma izstrāde un ieviešana.</strong>
+            </li>
+            <li>
+              <strong>Neparedzētie gadījumi.</strong> Rezerve
+              <strong>10–20% no pirmo divu daļu kopsummas</strong>.
+            </li>
+          </ol>
+          <div class="formula">
+            Pamatizmaksas = vadīšana + produkta izveide un ieviešana<br />Rezerve
+            = pamatizmaksas × rezerves likme<br /><strong
+              >Kopā = pamatizmaksas + rezerve</strong
+            >
+          </div>
+          <p class="example">
+            <strong>Skaidrojošs aprēķins.</strong> Ja vadīšana maksā 20 000 € un
+            produkts 80 000 €, pamatizmaksas ir 100 000 €. Ar 10% rezervi
+            kopējās izmaksas ir <strong>110 000 €</strong>.
+          </p>
+          <p class="note">
+            Šie procenti un turpmāk norādītās nodokļu likmes ir mācību materiāla
+            pieņēmumi un piemēri, nevis šeit pārbaudītas aktuālās prasības vai
+            katram projektam obligātas normas.
+          </p>
+        </div>
+        <p class="source">Avots: 3.2 · 36.–37. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="vadisanas-izmaksas"
+        data-keywords="bruto mēnešalga slodze VSAOI 23,59 PVN 21 birojs ārpakalpojumi virtuālais"
+      >
+        <h2 tabindex="-1">
+          <span class="num">25</span>Projekta vadīšanas izmaksu aprēķins
+        </h2>
+        <div class="content">
+          <h3>1. Komandas darba samaksa</h3>
+          <p>
+            Nosaka provizorisko sastāvu, katra cilvēka iesaistes intensitāti jeb
+            slodzi, bruto mēnešalgu un iesaistes laiku. Materiālā darba devēja
+            VSAOI pieņēmums ir <strong>23,59%</strong>.
+          </p>
+          <div class="formula">
+            Bruto samaksa projektā = pilnas slodzes mēnešalga × slodze ×
+            mēneši<br />Ar materiāla VSAOI = bruto samaksa × 1,2359
+          </div>
+          <p class="example">
+            <strong>Skaidrojošs aprēķins.</strong> 1 000 € × 0,5 slodze × 6
+            mēneši = 3 000 € bruto. Darba devēja VSAOI pēc materiāla likmes:
+            707,70 €. Kopā: <strong>3 707,70 €</strong>. Ja tabulā alga jau
+            norādīta attiecīgajai slodzei, otrreiz ar slodzi nereizina.
+          </p>
+          <h3>2. Ārējais personāls un ārpakalpojumi</h3>
+          <p>
+            Iekļauj noteiktam darbam vai stundām piesaistītus konsultantus un
+            ekspertus, kuri tieši atbalsta vadības komandu: juristu, grāmatvedi,
+            iepirkumu speciālistu u. c. Materiāls atšķir darba samaksu ar VSAOI
+            un pakalpojumu ar <strong>PVN 21%</strong>.
+          </p>
+          <h3>3. Projekta biroja uzturēšana</h3>
+          <ul>
+            <li>
+              Telpu noma un komunālie maksājumi vai esošu telpu uzturēšana.
+            </li>
+            <li>Datortehnikas un programmu licenču iegāde vai noma.</li>
+            <li>Sakari, internets, komandējumi, transports un degviela.</li>
+            <li>Kancelejas preces un citi biroja izdevumi.</li>
+          </ul>
+          <p>
+            <strong>Virtuālam birojam</strong> materiālā minēta attālinātā darba
+            kompensācija (piemēra pieņēmums — no 35 €/mēn.), saziņas platformu
+            licences, datortehnika, programmatūra un transports.
+          </p>
+          <p class="key">
+            Vadīšanas izmaksas ir resursi projekta vadībai. Produkta
+            izgatavošanas darbus pieskaita produkta izveides un ieviešanas
+            izmaksām.
+          </p>
+        </div>
+        <p class="source">Avots: 3.2 · 38.–41. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="produkta-izmaksas"
+        data-keywords="cena daudzums mērvienība noma būvniecība būvdarbi projektēšana autoruzraudzība būvuzraudzība ekspertīze tāme"
+      >
+        <h2 tabindex="-1">
+          <span class="num">26</span>Produkta izveides un ieviešanas izmaksas
+        </h2>
+        <div class="content">
+          <p>
+            Aprēķinu veido no
+            <strong>produkta aprakstā nosauktajām sastāvdaļām</strong>,
+            pievienojot pamatotas vidējās tirgus cenas. Neatkarīgi izveidots
+            cenu saraksts bez sasaistes ar produkta prasībām var atstāt būtiskas
+            pozīcijas neaprēķinātas.
+          </p>
+          <h3>Izmaksu pozīcijas</h3>
+          <ul>
+            <li>
+              Ēku un telpu iegāde vai noma; nomai materiālā izmaksas skaita no
+              līguma slēgšanas īstenošanas fāzē līdz projekta beigām.
+            </li>
+            <li>Objekta uzturēšana projekta laikā.</li>
+            <li>
+              Darbi, materiāli un mehānismi, ja izmanto iekšējos resursus, vai
+              ārējo apakšuzņēmēju līgumsummas.
+            </li>
+            <li>Aprīkojums, transports, tehnika un pakalpojumu sniedzēji.</li>
+            <li>Citas konkrētā produkta izveidei nepieciešamās pozīcijas.</li>
+          </ul>
+          <h3>Kā noformēt aprēķinu?</h3>
+          <p>
+            Norāda pozīciju, mērvienību, vienības cenu, vienību skaitu vai
+            periodu un kopsummu. Atšķir summas bez PVN un ar PVN un norāda cenu
+            informācijas avotus. PVN automātiski nepieskaita katrai rindai —
+            materiāla piemēros pozīciju nodokļu piemērošana atšķiras.
+          </p>
+          <div class="formula">
+            Pozīcijas summa = vienības cena × daudzums<br />Nomas summa = mēneša
+            maksa × projekta nomas mēneši
+          </div>
+          <p class="example">
+            <strong>Skaidrojošs piemērs.</strong> Produkta aprakstā ir 3 soliņi.
+            Ja viena cena ir 250 €, pozīcijas summa ir 750 € tajā pašā cenu
+            bāzē. Ja telpas maksā 600 €/mēn. un projektā tās nomā 6 mēnešus,
+            noma ir 3 600 € pirms piemērojamajiem nodokļiem.
+          </p>
+          <h3>Būvniecības izmaksas koncepta līmenī</h3>
+          <p>
+            Sākotnēji būvdarbus var novērtēt kā
+            <strong>platība m² × izmaksas par 1 m²</strong> (darbi,
+            būvizstrādājumi un mehānismi). Materiālā šajā stadijā neprasa
+            detalizētu būvdarbu tāmi.
+          </p>
+          <p>
+            Slaida piemēra papildu izmaksas rēķina
+            <strong>no kopējām būvdarbu izmaksām</strong>:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Pozīcija</th>
+                <th scope="col">Piemēra likme</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Projekta izstrāde / projektēšana</td>
+                <td>5%</td>
+              </tr>
+              <tr>
+                <td>Autoruzraudzība</td>
+                <td>0,5%</td>
+              </tr>
+              <tr>
+                <td>Būvuzraudzība</td>
+                <td>0,5%</td>
+              </tr>
+              <tr>
+                <td>Ekspertīze</td>
+                <td>0,4%</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="key">
+            Pārbaude: katrai produkta sastāvdaļai ir vajadzīgie darbi, katram
+            darbam ir laiks un resursi, un nepieciešamie resursi ir iekļauti
+            izmaksās.
+          </p>
+        </div>
+        <p class="source">Avots: 3.2 · 42.–51. lpp.</p>
+      </section>
+      <div class="group-title">Atkārtošanai</div>
+      <section
+        class="chapter"
+        id="atkartojums"
+        data-keywords="kontroldarbs atkārtošana kopsavilkums avoti skaitļi"
+      >
+        <h2 tabindex="-1">
+          <span class="num">27</span>Īsais atkārtojums un avoti
+        </h2>
+        <div class="content">
+          <h3>Pirms kontroldarba prast izskaidrot</h3>
+          <ol>
+            <li>
+              Kā atšķiras tīrā, štāba un matricas forma pēc pilnvarām,
+              pakļautības un trūkumiem?
+            </li>
+            <li>
+              Ko dara vadītājs, uzdevuma devējs/sponsors un uzraudzības
+              komiteja?
+            </li>
+            <li>
+              Kā atpazīst interesentus un izvēlas sadarbību pēc ietekmes un
+              intereses?
+            </li>
+            <li>Kuri SVID faktori ir iekšēji un kuri ārēji?</li>
+            <li>Kā atšķiras riska varbūtība, ietekme un reakcija uz risku?</li>
+            <li>
+              Kādas ir četras risku reakcijas, kas ir risku reģistrs un ko
+              ietver risku vadīšanas plāns?
+            </li>
+            <li>
+              Kā izmaiņu pieprasījums sasaistās ar projekta dokumentāciju?
+            </li>
+            <li>Kā nošķir produkta prasības no darbu saraksta?</li>
+            <li>
+              Kā atšķiras projekta fāzes, īpaši abas koncepcijas un
+              īstenošana/ieviešana?
+            </li>
+            <li>Kā aprēķina darba samaksu, produkta izmaksas un rezervi?</li>
+          </ol>
+          <h3>Skaitļi no materiāla</h3>
+          <p>
+            <strong>1 darba diena</strong> — darba minimālais ilgums uzdevumā.
+            <strong>−25%…+75%</strong> — sākotnējās izmaksu aplēses precizitātes
+            diapazons. <strong>10–35%</strong> — vadīšanas izmaksu aptuvenais
+            īpatsvars. <strong>10–20%</strong> — rezerve no vadīšanas un
+            produkta izmaksu summas. <strong>23,59%</strong> VSAOI un
+            <strong>21%</strong> PVN — materiāla aprēķinu pieņēmumi. Būvniecības
+            papildu pozīciju piemērs: <strong>5%; 0,5%; 0,5%; 0,4%</strong>.
+          </p>
+          <h3>Izmantotie mācību materiāli</h3>
+          <ul class="sources">
+            <li>
+              <strong>2</strong> — „2_Projektu vadīšana.pdf”, 13 lpp.
+              Organizācija un institūciju lomas.
+            </li>
+            <li>
+              <strong>3</strong> — „3_Projektu vadīšana.pdf”, 31 lpp.
+              Interesenti, SVID, riski un izmaiņas.
+            </li>
+            <li>
+              <strong>3.2</strong> — „3.2.Projekta koncepts 2026.pdf”, 51 lpp.,
+              Daiga Āboltiņa. Produkta prasības, laiks un izmaksas.
+            </li>
+          </ul>
+          <p>
+            Pie nodaļām norādītas oriģinālo PDF lappuses, skaitot no pirmās
+            lapas. Atkārtojumi apvienoti, neveikli formulējumi saīsināti,
+            saglabājot materiālu jēgu. Ekrānuzņēmumu piemēri izmantoti pieejas
+            izskaidrošanai, nevis pārstāstīti cits pēc cita. Papildu piemēri ir
+            apzīmēti kā skaidrojoši.
+          </p>
+          <p class="note">
+            Šis pārskats aptver trīs pievienotos materiālus. Tas nepievieno
+            teoriju no citiem kursa materiāliem.
+          </p>
+        </div>
+        <p class="source">Avots: Visu trīs materiālu apkopojums</p>
+      </section>
+      <a class="bottom-link" href="#sakums">Uz sākumu</a>
+    </main>
+    <script>
+      (() => {
+        "use strict";
+        const $ = (id) => document.getElementById(id),
+          q = $("search"),
+          results = $("search-panel"),
+          list = $("results"),
+          status = $("result-status"),
+          toc = $("toc-panel"),
+          toggle = $("toc-toggle"),
+          clear = $("clear");
+        const fold = (s) =>
+          s
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLocaleLowerCase("lv");
+        const chapters = [...document.querySelectorAll(".chapter")].map(
+          (el) => ({
+            el,
+            id: el.id,
+            title: el.querySelector("h2").textContent.trim(),
+            text: el
+              .querySelector(".content")
+              .textContent.replace(/\s+/g, " ")
+              .trim(),
+            keys: el.dataset.keywords || "",
+          }),
+        );
+        const index = chapters.map((c) => ({
+          ...c,
+          search: fold(c.title + " " + c.keys + " " + c.text),
+          heading: fold(c.title + " " + c.keys),
+        }));
+        function closePanels() {
+          results.hidden = true;
+          toc.hidden = true;
+          toggle.setAttribute("aria-expanded", "false");
+          q.setAttribute("aria-expanded", "false");
+        }
+        function jump(id) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          closePanels();
+          q.blur();
+          try {
+            history.replaceState(history.state, "", "#" + id);
+          } catch (e) {
+            location.hash = id;
+          }
+          el.scrollIntoView({ block: "start" });
+          el.classList.remove("visited-target");
+          void el.offsetWidth;
+          el.classList.add("visited-target");
+          const heading = el.querySelector("h2");
+          heading.focus({ preventScroll: true });
+        }
+        function render() {
+          const input = q.value.trim();
+          clear.hidden = !input;
+          if (!input) {
+            results.hidden = true;
+            q.setAttribute("aria-expanded", "false");
+            return;
+          }
+          toc.hidden = true;
+          toggle.setAttribute("aria-expanded", "false");
+          const words = fold(input).split(/\s+/).filter(Boolean),
+            matches = index
+              .filter((c) => words.every((w) => c.search.includes(w)))
+              .sort(
+                (a, b) =>
+                  words.filter((w) => b.heading.includes(w)).length -
+                  words.filter((w) => a.heading.includes(w)).length,
+              );
+          list.replaceChildren();
+          status.textContent = matches.length
+            ? `Atrastas nodaļas: ${matches.length}. Pieskaries rezultātam; Enter atver pirmo.`
+            : "Nekas nav atrasts. Pamēģini īsāku vārdu, piemēram, „matric”, „risk” vai „izmaks”.";
+          for (const c of matches) {
+            const a = document.createElement("a");
+            a.href = "#" + c.id;
+            a.className = "result";
+            const h = document.createElement("strong");
+            h.textContent = c.title;
+            const small = document.createElement("small");
+            const plain = fold(c.text);
+            let p = -1;
+            for (const w of words) {
+              p = plain.indexOf(w);
+              if (p >= 0) break;
+            }
+            const start = Math.max(0, p - 45);
+            small.textContent =
+              (start ? "…" : "") +
+              c.text.slice(start, start + 155) +
+              (c.text.length > start + 155 ? "…" : "");
+            a.append(h, small);
+            a.addEventListener("click", (e) => {
+              e.preventDefault();
+              jump(c.id);
+            });
+            list.append(a);
+          }
+          results.hidden = false;
+          q.setAttribute("aria-expanded", "true");
+        }
+        q.addEventListener("input", render);
+        q.addEventListener("focus", () => {
+          if (q.value.trim()) render();
+        });
+        q.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            const first = list.querySelector("a");
+            if (!results.hidden && first) {
+              e.preventDefault();
+              jump(first.hash.slice(1));
+            }
+          } else if (e.key === "ArrowDown") {
+            const first = list.querySelector("a");
+            if (!results.hidden && first) {
+              e.preventDefault();
+              first.focus();
+            }
+          } else if (e.key === "Escape") {
+            closePanels();
+            q.blur();
+          }
+        });
+        clear.addEventListener("click", () => {
+          q.value = "";
+          render();
+          q.focus();
+        });
+        toggle.addEventListener("click", () => {
+          const open = toc.hidden;
+          closePanels();
+          toc.hidden = !open;
+          toggle.setAttribute("aria-expanded", String(open));
+          q.blur();
+        });
+        document.querySelectorAll("[data-jump]").forEach((a) =>
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            jump(a.dataset.jump);
+          }),
+        );
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest(".toolbar,.panel")) closePanels();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            closePanels();
+            toggle.focus();
+          }
+          if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+            e.preventDefault();
+            q.focus();
+            q.select();
+          }
+        });
+        let size = 16;
+        const persist = () => {
+          try {
+            localStorage.setItem(
+              "pv-reading",
+              JSON.stringify({
+                size,
+                dark: document.body.classList.contains("dark"),
+              }),
+            );
+          } catch (e) {}
+        };
+        function setSize(n) {
+          size = Math.max(15, Math.min(20, n));
+          document.documentElement.style.setProperty("--size", size + "px");
+          $("font-status").textContent = size + " px";
+          persist();
+        }
+        $("smaller").addEventListener("click", () => setSize(size - 1));
+        $("larger").addEventListener("click", () => setSize(size + 1));
+        $("night").addEventListener("change", (e) => {
+          document.body.classList.toggle("dark", e.target.checked);
+          persist();
+        });
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("pv-reading") || "null",
+          );
+          if (saved) {
+            if (Number.isFinite(saved.size))
+              size = Math.max(15, Math.min(20, saved.size));
+            document.documentElement.style.setProperty("--size", size + "px");
+            document.body.classList.toggle("dark", !!saved.dark);
+            $("night").checked = !!saved.dark;
+          }
+        } catch (e) {}
+        $("font-status").textContent = size + " px";
+        const bar = document.querySelector(".toolbar");
+        function sync() {
+          document.documentElement.style.setProperty(
+            "--top",
+            bar.getBoundingClientRect().height + "px",
+          );
+        }
+        if (window.ResizeObserver) new ResizeObserver(sync).observe(bar);
+        sync();
+      })();
+    </script>
+  </body>
+</html>
