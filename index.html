@@ -189,10 +189,9 @@
             <strong>Projektu vadība</strong>
             <small>Tēmas 2., 3., 3.2</small>
           </button>
-          <button class="choice" type="button" disabled>
-            <strong>Preču realizācijas vadība (1.KD)</strong>
-            <small>Drīzumā — konspekts vēl nav pievienots.</small>
-          </button>
+          <button id="sales" class="choice" type="button">
+  <strong>Preču realizācijas vadība (1.KD)</strong>
+</button>
         </div>
         <p
           id="menu-message"
@@ -368,10 +367,57 @@
           $("name").focus();
         });
 
-        // Pārbauda arī lapas atjaunošanu no pārlūka atmiņas ar pogu Atpakaļ.
+// Pārbauda arī lapas atjaunošanu no pārlūka atmiņas ar pogu Atpakaļ.
         window.addEventListener("pageshow", (event) => {
           if (event.persisted) initialize();
         });
+        // Otrās konspekta pogas darbība.
+        const salesButton = $("sales");
+
+        // Ja pogas vēl nav, sākumlapas pārējā darbība turpinās.
+        if (salesButton) {
+          salesButton.addEventListener("click", () => {
+            const auth = readAuth();
+
+            if (!auth) {
+              showLogin("Ievadi savu vārdu vēlreiz.");
+              return;
+            }
+
+            try {
+              const url = new URL(
+                "precu-realizacijas-vadiba.html",
+                location.href,
+              );
+              const entryToken = token();
+
+              sessionStorage.setItem(
+                ENTRY_KEY,
+                JSON.stringify({
+                  token: entryToken,
+                  session: auth.id,
+                  path: url.pathname,
+                  expires: Date.now() + 120000,
+                }),
+              );
+
+              url.searchParams.set("entry", entryToken);
+              location.assign(url.href);
+            } catch {
+              message(
+                "menu-message",
+                "Konspektu neizdevās atvērt. Ievadi vārdu vēlreiz.",
+              );
+            }
+          });
+        }
+
+        // Atjauno sākumlapu, atgriežoties ar pārlūka pogu Atpakaļ.
+        window.addEventListener("pageshow", (event) => {
+          if (event.persisted) initialize();
+        });
+
+        // Sākumlapas sākotnējā palaišana.
         initialize();
       })();
     </script>
