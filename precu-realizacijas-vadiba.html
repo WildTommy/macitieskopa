@@ -1,0 +1,3723 @@
+<!doctype html>
+<html lang="lv">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5f1" />
+    <meta
+      name="description"
+      content="Preču realizācijas vadības konspekts 1. kontroldarbam: tirgus un klienta vērtība, pircēju uzvedība, segmentēšana, CRM, inovācijas un realizācijas instrumenti."
+    />
+    <title>Preču realizācijas vadība — 1. KD konspekts</title>
+    <style>
+      html:not([data-study-access]) {
+        visibility: hidden !important;
+      }
+    </style>
+    <noscript>
+      <meta http-equiv="refresh" content="0;url=index.html?login=required" />
+    </noscript>
+    <script>
+      (() => {
+        const AUTH = "macibas.auth.v1";
+        const ENTRY = "macibas.entry.v1";
+
+        function checkAccess() {
+          let allowed = false;
+          try {
+            const auth = JSON.parse(sessionStorage.getItem(AUTH) || "null");
+            const validUser =
+              auth &&
+              typeof auth.id === "string" &&
+              auth.id.length === 32 &&
+              ["Toms", "Arta", "Gabriēla"].includes(auth.name);
+            const url = new URL(location.href);
+            const entryToken = url.searchParams.get("entry");
+
+            if (validUser && entryToken) {
+              const entry = JSON.parse(sessionStorage.getItem(ENTRY) || "null");
+              allowed = !!(
+                entry &&
+                entry.token === entryToken &&
+                entry.session === auth.id &&
+                entry.path === location.pathname &&
+                Number.isFinite(entry.expires) &&
+                entry.expires > Date.now()
+              );
+
+              if (allowed) {
+                // Vienreizējo ieejas atļauju patērē; pārlādei saglabā vēstures ierakstu.
+                sessionStorage.removeItem(ENTRY);
+                url.searchParams.delete("entry");
+                history.replaceState(
+                  {
+                    ...history.state,
+                    macibasAccess: {
+                      session: auth.id,
+                      path: location.pathname,
+                    },
+                  },
+                  "",
+                  url.href,
+                );
+              }
+            } else if (validUser) {
+              const grant = history.state && history.state.macibasAccess;
+              allowed = !!(
+                grant &&
+                grant.session === auth.id &&
+                grant.path === location.pathname
+              );
+            }
+          } catch {
+            allowed = false;
+          }
+
+          document.documentElement.toggleAttribute(
+            "data-study-access",
+            allowed,
+          );
+          if (!allowed) {
+            try {
+              sessionStorage.removeItem(AUTH);
+              sessionStorage.removeItem(ENTRY);
+            } catch {}
+            location.replace("index.html?login=required");
+          }
+        }
+
+        window.addEventListener("pagehide", () => {
+          document.documentElement.removeAttribute("data-study-access");
+        });
+        window.addEventListener("pageshow", checkAccess);
+        checkAccess();
+      })();
+    </script>
+
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f5f1;
+        --fg: #2a2f35;
+        --muted: #5c6470;
+        --line: #cdd1d7;
+        --soft: #e9edf1;
+        --accent: #405c78;
+        --bar: #f6f5f1;
+        --mark: #e6dfb5;
+        --size: 16px;
+        --top: 58px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-padding-top: calc(var(--top) + 12px);
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          var(--size)/1.5 system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        overflow-wrap: break-word;
+      }
+      body.dark {
+        color-scheme: dark;
+        --bg: #1d2228;
+        --fg: #e2e5e8;
+        --muted: #b1bac7;
+        --line: #485360;
+        --soft: #2a333e;
+        --accent: #aec5dd;
+        --bar: #1d2228;
+        --mark: #665e2e;
+      }
+      a {
+        color: var(--accent);
+        text-underline-offset: 3px;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        color: var(--fg);
+        background: var(--soft);
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        min-height: 38px;
+        cursor: pointer;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      input:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      button:hover {
+        border-color: var(--accent);
+      }
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--bar);
+        border-bottom: 1px solid var(--line);
+        padding: 7px 12px;
+      }
+      .toolbar-inner {
+        max-width: 820px;
+        margin: auto;
+        display: flex;
+        gap: 7px;
+        align-items: center;
+      }
+      .search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+      }
+      .search-wrap input {
+        width: 100%;
+        height: 40px;
+        padding: 7px 37px 7px 10px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        color: var(--fg);
+        background: var(--bg);
+        font-size: 16px;
+        appearance: none;
+      }
+      .search-wrap input::-webkit-search-cancel-button {
+        display: none;
+      }
+      .clear {
+        position: absolute;
+        right: 1px;
+        top: 1px;
+        min-width: 34px;
+        border: 0;
+        background: transparent;
+        font-size: 23px;
+        line-height: 1;
+      }
+      .toc-toggle {
+        padding: 0 10px;
+        height: 40px;
+      }
+      .panel {
+        position: fixed;
+        top: var(--top);
+        left: 0;
+        right: 0;
+        z-index: 19;
+        background: var(--bar);
+        border-bottom: 1px solid var(--line);
+        box-shadow: 0 7px 14px #0002;
+        max-height: min(70vh, 620px);
+        overflow: auto;
+        overscroll-behavior: contain;
+      }
+      .panel-inner {
+        max-width: 844px;
+        margin: auto;
+        padding: 10px 12px;
+      }
+      .panel[hidden],
+      button[hidden] {
+        display: none;
+      }
+      .result {
+        display: block;
+        padding: 10px 2px;
+        border-top: 1px solid var(--line);
+        color: var(--fg);
+        text-decoration: none;
+      }
+      .result strong {
+        display: block;
+        font-size: 0.97em;
+      }
+      .result small {
+        display: block;
+        color: var(--muted);
+        font-size: 0.84em;
+        line-height: 1.45;
+        margin-top: 2px;
+      }
+      .result:hover,
+      .result:focus {
+        background: var(--soft);
+      }
+      .result-meta {
+        font-size: 0.82em;
+        color: var(--muted);
+        margin: 0 0 7px;
+      }
+      .toc-links {
+        display: grid;
+        gap: 2px;
+      }
+      .toc-links a {
+        font-size: 0.94em;
+        text-decoration: none;
+        padding: 6px 2px;
+      }
+      .toc-group {
+        font-size: 0.8em;
+        font-weight: 700;
+        color: var(--muted);
+        margin: 10px 0 1px;
+      }
+      .prefs {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--line);
+        font-size: 0.88em;
+      }
+      .prefs button {
+        padding: 2px 10px;
+      }
+      .prefs label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 38px;
+      }
+      .prefs input {
+        width: 18px;
+        height: 18px;
+      }
+      main {
+        max-width: 844px;
+        margin: auto;
+        padding: 16px 12px 26px;
+      }
+      header h1 {
+        font-size: 1.65em;
+        line-height: 1.2;
+        letter-spacing: -0.025em;
+        margin: 0 0 8px;
+      }
+      header p {
+        margin: 7px 0;
+      }
+      .intro {
+        font-size: 0.93em;
+        color: var(--muted);
+      }
+      .group-title {
+        font-size: 0.81em;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin: 29px 0 0;
+        color: var(--accent);
+        font-weight: 700;
+        border-top: 2px solid var(--line);
+        padding-top: 11px;
+      }
+      .chapter {
+        padding-top: 17px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--line);
+        scroll-margin-top: 12px;
+      }
+      .chapter:last-child {
+        border: 0;
+      }
+      .chapter h2 {
+        font-size: 1.25em;
+        line-height: 1.3;
+        letter-spacing: -0.015em;
+        margin: 0 0 10px;
+      }
+      .num {
+        font-variant-numeric: tabular-nums;
+        color: var(--muted);
+        font-size: 0.78em;
+        margin-right: 7px;
+        font-weight: 500;
+      }
+      h3 {
+        font-size: 1.03em;
+        line-height: 1.35;
+        margin: 16px 0 6px;
+      }
+      p {
+        margin: 8px 0;
+      }
+      ul,
+      ol {
+        padding-left: 21px;
+        margin: 8px 0;
+      }
+      li {
+        padding-left: 1px;
+        margin: 4px 0;
+      }
+      dl {
+        margin: 8px 0;
+      }
+      dt {
+        font-weight: 650;
+        margin-top: 9px;
+      }
+      dd {
+        margin: 2px 0 8px;
+      }
+      .compact dt {
+        margin-top: 6px;
+      }
+      .compact dd {
+        margin-bottom: 5px;
+      }
+      .key {
+        padding: 8px 10px;
+        border-left: 3px solid var(--accent);
+        background: var(--soft);
+        font-size: 0.95em;
+        margin: 12px 0;
+      }
+      .example {
+        border-left: 2px solid var(--line);
+        padding: 1px 0 1px 10px;
+        margin: 12px 0;
+        font-size: 0.94em;
+      }
+      .example p {
+        margin: 7px 0;
+      }
+      .note {
+        font-size: 0.85em;
+        color: var(--muted);
+      }
+      .source {
+        font-size: 0.75em;
+        color: var(--muted);
+        margin: 12px 0 5px;
+      }
+      .formula {
+        font-size: 0.94em;
+        line-height: 1.65;
+        background: var(--soft);
+        padding: 8px 10px;
+        margin: 10px 0;
+      }
+      .matrix {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border-top: 1px solid var(--line);
+        border-left: 1px solid var(--line);
+        font-size: 0.89em;
+        margin: 11px 0;
+      }
+      .matrix > div {
+        padding: 9px 8px;
+        border-bottom: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+      }
+      .matrix .axis {
+        padding: 6px 8px;
+        background: var(--soft);
+        font-size: 0.84em;
+        font-weight: 600;
+      }
+      .matrix strong {
+        display: inline-block;
+        margin-bottom: 3px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.9em;
+        margin: 10px 0;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 7px 8px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        background: var(--soft);
+        font-weight: 600;
+      }
+      th:last-child,
+      td:last-child {
+        width: 32%;
+      }
+      .diagram {
+        margin: 12px 0 10px;
+        padding: 0;
+      }
+      .diagram svg {
+        width: 100%;
+        max-width: 400px;
+        display: block;
+        margin: 0 auto;
+        height: auto;
+      }
+      .lines {
+        fill: none;
+        stroke: var(--muted);
+        stroke-width: 1.5;
+      }
+      .dash {
+        stroke-dasharray: 4 3;
+      }
+      .boxes rect {
+        fill: var(--soft);
+        stroke: var(--line);
+        rx: 3;
+      }
+      .labels {
+        fill: var(--fg);
+        font:
+          12px system-ui,
+          sans-serif;
+        text-anchor: middle;
+      }
+      .diagram figcaption {
+        font-size: 0.76em;
+        color: var(--muted);
+        margin-top: 3px;
+        text-align: center;
+      }
+      .phase-list li {
+        margin: 5px 0;
+      }
+      .sources {
+        font-size: 0.9em;
+      }
+      .visited-target {
+        animation: targetflash 1.7s ease-out;
+      }
+      mark {
+        background: var(--mark);
+        color: inherit;
+      }
+      .bottom-link {
+        display: inline-block;
+        margin-top: 15px;
+        font-size: 0.9em;
+      }
+      .noscript {
+        font-size: 0.85em;
+        color: var(--muted);
+      }
+      @keyframes targetflash {
+        0%,
+        40% {
+          background: var(--soft);
+        }
+        100% {
+          background: transparent;
+        }
+      }
+      @media (min-width: 700px) {
+        main {
+          padding: 22px 24px 40px;
+        }
+        .toolbar {
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+        .panel-inner {
+          padding: 12px 24px;
+        }
+        .toc-links {
+          grid-template-columns: 1fr 1fr;
+          column-gap: 20px;
+        }
+        .toc-group {
+          grid-column: 1/-1;
+        }
+        .chapter {
+          padding-top: 22px;
+        }
+        .matrix {
+          font-size: 0.95em;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+      @media print {
+        .toolbar,
+        .panel,
+        .bottom-link {
+          display: none !important;
+        }
+        main {
+          max-width: none;
+          padding: 0;
+        }
+        body,
+        body.dark {
+          --bg: white;
+          --fg: #111;
+          --muted: #444;
+          --line: #aaa;
+          --soft: #f2f2f2;
+          --accent: #222;
+          font-size: 11pt;
+          background: white;
+          color: #111;
+        }
+        .chapter {
+          break-inside: auto;
+        }
+        .chapter h2,
+        h3 {
+          break-after: avoid;
+        }
+        .diagram,
+        .matrix,
+        table,
+        .example,
+        .key {
+          break-inside: avoid;
+        }
+        .group-title {
+          margin-top: 20px;
+        }
+      }
+
+      .toolbar,
+      .panel {
+        font-size: 16px;
+      }
+      .back {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        padding: 0 7px;
+        text-decoration: none;
+        color: var(--fg);
+        font-size: 14px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: var(--soft);
+      }
+      .chapter h2 {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.7em;
+      }
+      .chapter h2 > .num {
+        flex: 0 0 2.1ch;
+        margin: 0.14em 0 0;
+        font-size: 0.75em;
+        line-height: 1.5;
+      }
+      .chapter h2 > .chapter-title {
+        min-width: 0;
+      }
+      .chapter h2:focus {
+        outline: none;
+      }
+      .chapter h2:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 4px;
+      }
+      .source {
+        font-size: max(10px, 0.76em);
+      }
+      .note {
+        font-size: max(10px, 0.85em);
+      }
+      .group-title {
+        font-size: max(10px, 0.81em);
+      }
+      .diagram figcaption {
+        font-size: max(10px, 0.78em);
+      }
+      .matrix,
+      table {
+        font-size: max(10px, 0.9em);
+      }
+      .key,
+      .example,
+      .formula,
+      .intro,
+      .sources {
+        font-size: max(10px, 0.94em);
+      }
+      th:last-child,
+      td:last-child {
+        width: auto;
+      }
+      .flow {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 6px;
+        font-size: max(10px, 0.86em);
+        line-height: 1.4;
+        margin: 12px 0;
+      }
+      .flow > span {
+        background: var(--soft);
+        border-top: 2px solid var(--accent);
+        padding: 8px 7px;
+      }
+      .flow strong {
+        display: block;
+      }
+      .flow br {
+        display: none;
+      }
+      @media print {
+        .back {
+          display: none;
+        }
+        .flow {
+          break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body id="sakums">
+    <div class="toolbar">
+      <div class="toolbar-inner">
+        <a
+          class="back"
+          href="index.html"
+          aria-label="Atpakaļ uz konspektu izvēli"
+          >Atpakaļ</a
+        >
+        <div class="search-wrap">
+          <label
+            for="search"
+            style="
+              position: absolute;
+              width: 1px;
+              height: 1px;
+              overflow: hidden;
+              clip-path: inset(50%);
+            "
+            >Meklēt visā konspektā</label
+          ><input
+            id="search"
+            type="search"
+            placeholder="Meklēt konspektā…"
+            autocomplete="off"
+            spellcheck="false"
+            aria-controls="search-panel"
+            aria-expanded="false"
+          /><button
+            id="clear"
+            class="clear"
+            type="button"
+            aria-label="Notīrīt meklējumu"
+            hidden
+          >
+            ×
+          </button>
+        </div>
+        <button
+          id="toc-toggle"
+          class="toc-toggle"
+          type="button"
+          aria-controls="toc-panel"
+          aria-expanded="false"
+        >
+          Saturs
+        </button>
+      </div>
+    </div>
+    <div
+      id="search-panel"
+      class="panel"
+      role="region"
+      aria-label="Meklēšanas rezultāti"
+      hidden
+    >
+      <div class="panel-inner">
+        <p
+          id="result-status"
+          class="result-meta"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <div id="results"></div>
+      </div>
+    </div>
+    <nav id="toc-panel" class="panel" aria-label="Konspekta saturs" hidden>
+      <div class="panel-inner">
+        <div class="prefs">
+          <span>Teksts</span
+          ><button id="smaller" type="button" aria-label="Samazināt tekstu">
+            A−</button
+          ><span id="font-status">16 px</span
+          ><button id="larger" type="button" aria-label="Palielināt tekstu">
+            A+</button
+          ><label><input id="night" type="checkbox" />Tumšs fons</label
+          ><small>10–22 px</small>
+        </div>
+        <div class="toc-links">
+          <div class="toc-group">Tirgus un klienta vērtība</div>
+          <a href="#realizacijas-butiba" data-jump="realizacijas-butiba"
+            >01. Realizācijas vadība un mārketinga loma</a
+          >
+          <a href="#vajadziba-pieprasijums" data-jump="vajadziba-pieprasijums"
+            >02. Vajadzība, vēlme, motīvs un pieprasījums</a
+          >
+          <a href="#orientaciju-attistiba" data-jump="orientaciju-attistiba"
+            >03. Uzņēmuma orientācijas attīstība</a
+          >
+          <a href="#moderna-pardosana" data-jump="moderna-pardosana"
+            >04. Sešas modernās pārdošanas iezīmes</a
+          >
+          <a href="#produkta-limeni" data-jump="produkta-limeni"
+            >05. Produkts un klienta vērtības līmeņi</a
+          >
+          <a
+            href="#prece-pakalpojums-serviss"
+            data-jump="prece-pakalpojums-serviss"
+            >06. Prece, pakalpojums un pavadošais serviss</a
+          >
+          <a href="#precu-klasifikacija" data-jump="precu-klasifikacija"
+            >07. Preču iedalījums un pircēja iesaiste</a
+          >
+          <a href="#komplekss-piedavajums" data-jump="komplekss-piedavajums"
+            >08. Kompleksi piedāvājumi, pielāgošana un know-how</a
+          >
+          <div class="toc-group">Inovācija un konkurētspēja</div>
+          <a href="#inovacija" data-jump="inovacija"
+            >09. Inovācija un tās pieņemšana</a
+          >
+          <a href="#desmit-inovaciju-tipi" data-jump="desmit-inovaciju-tipi"
+            >10. Desmit inovāciju tipi</a
+          >
+          <div class="toc-group">Tirgus dalībnieki un pirkšana</div>
+          <a
+            href="#strategiskais-trijsturis"
+            data-jump="strategiskais-trijsturis"
+            >11. Stratēģiskais trijstūris un realizācijas dalībnieki</a
+          >
+          <a href="#pardosanas-tipi" data-jump="pardosanas-tipi"
+            >12. Pārdošanas lomu un uzdevumu tipi</a
+          >
+          <a href="#b2c-b2b" data-jump="b2c-b2b"
+            >13. B2C un B2B pirkumu atšķirības</a
+          >
+          <a href="#pirksanas-lomas" data-jump="pirksanas-lomas"
+            >14. Pircējs, lietotājs un pirkšanas centrs</a
+          >
+          <a href="#b2b-process" data-jump="b2b-process"
+            >15. B2B pirkšanas process un pirkšanas režģis</a
+          >
+          <a href="#b2b-kriteriji" data-jump="b2b-kriteriji"
+            >16. B2B izvēles kritēriji un uztvertā vērtība</a
+          >
+          <div class="toc-group">Pircēja uzvedība un tās izpēte</div>
+          <a href="#pateretaja-process" data-jump="pateretaja-process"
+            >17. Patērētāja ceļš līdz pirkumam</a
+          >
+          <a href="#psihologiskie-faktori" data-jump="psihologiskie-faktori"
+            >18. Motivācija, uztvere, attieksme un risks</a
+          >
+          <a
+            href="#personigas-socialas-ietekmes"
+            data-jump="personigas-socialas-ietekmes"
+            >19. Personiskās un sociālās ietekmes</a
+          >
+          <a href="#uzvedibas-izpete" data-jump="uzvedibas-izpete"
+            >20. Uzvedības „melnā kaste” un izpētes metodes</a
+          >
+          <a href="#ietekmetaji" data-jump="ietekmetaji"
+            >21. Eksperti, ietekmētāji un modelis 1 : 9 : 90</a
+          >
+          <div class="toc-group">Segmentēšana un individualizācija</div>
+          <a href="#segmentesanas-butiba" data-jump="segmentesanas-butiba"
+            >22. Segmentēšana un mērķa grupas izvēle</a
+          >
+          <a href="#segmentesanas-kriteriji" data-jump="segmentesanas-kriteriji"
+            >23. B2C un B2B segmentēšanas kritēriji</a
+          >
+          <a href="#individuals-marketings" data-jump="individuals-marketings"
+            >24. No masu pieejas līdz „viens pret vienu”</a
+          >
+          <div class="toc-group">Uzņēmuma vadīšana un attiecības</div>
+          <a href="#triades-koncepcija" data-jump="triades-koncepcija"
+            >25. Mārketinga divējādā izpratne un triāde</a
+          >
+          <a
+            href="#tirgus-orientacijas-prasibas"
+            data-jump="tirgus-orientacijas-prasibas"
+            >26. Pieci orientācijas virzieni un desmit prasības</a
+          >
+          <a
+            href="#apmierinatiba-lojalitate"
+            data-jump="apmierinatiba-lojalitate"
+            >27. Tuvība klientam, apmierinātība un lojalitāte</a
+          >
+          <a href="#realizacijas-vaditajs" data-jump="realizacijas-vaditajs"
+            >28. Realizācijas vadītāja atbildība</a
+          >
+          <a href="#crm" data-jump="crm"
+            >29. CRM — vienota klientu attiecību pieeja</a
+          >
+          <a href="#datubazes-marketings" data-jump="datubazes-marketings"
+            >30. Datu bāzes mārketings</a
+          >
+          <div class="toc-group">Mārketinga un realizācijas instrumenti</div>
+          <a href="#politika-instrumenti" data-jump="politika-instrumenti"
+            >31. Politika, stratēģija un instrumentārijs</a
+          >
+          <a href="#pieprasijuma-stavokli" data-jump="pieprasijuma-stavokli"
+            >32. Pieprasījuma stāvoklis un atbilstošā rīcība</a
+          >
+          <a href="#mikss" data-jump="mikss"
+            >33. 4P un politiku savstarpējā saistība</a
+          >
+          <a href="#piedavajuma-politika" data-jump="piedavajuma-politika"
+            >34. Piedāvājuma, sortimenta un servisa politika</a
+          >
+          <a href="#darijuma-politika" data-jump="darijuma-politika"
+            >35. Cena un darījuma nosacījumi</a
+          >
+          <a href="#noieta-politika" data-jump="noieta-politika"
+            >36. Četras noieta / realizācijas politikas daļas</a
+          >
+          <a href="#ecr" data-jump="ecr">37. Datu integrācija un ECR</a>
+          <a href="#komunikaciju-politika" data-jump="komunikaciju-politika"
+            >38. Komunikācija, zīmols un instrumentu grupas</a
+          >
+          <a href="#instrumentu-saskanosana" data-jump="instrumentu-saskanosana"
+            >39. Instrumentu kombinēšana un sinerģija</a
+          >
+          <div class="toc-group">Atšķirības nozarēs un digitālajā vidē</div>
+          <a href="#plasa-paterina-tirgus" data-jump="plasa-paterina-tirgus"
+            >40. Plaša patēriņa preču tirgus</a
+          >
+          <a href="#push-pull" data-jump="push-pull"
+            >41. Push un Pull stratēģijas</a
+          >
+          <a href="#razosanas-tirgus" data-jump="razosanas-tirgus"
+            >42. Ražošanas līdzekļu tirgus īpatnības</a
+          >
+          <a href="#pakalpojumi-iestades" data-jump="pakalpojumi-iestades"
+            >43. Tirdzniecība, pakalpojumi un nekomerciālas organizācijas</a
+          >
+          <a href="#internets-daudzkanalu" data-jump="internets-daudzkanalu"
+            >44. Internets un daudzkanālu realizācija</a
+          >
+          <div class="toc-group">Atkārtošanai</div>
+          <a href="#atkartojums" data-jump="atkartojums"
+            >45. Īsais atkārtojums un jēdzienu atšķirības</a
+          >
+          <a href="#avoti" data-jump="avoti">46. Avoti un konspekta robežas</a>
+        </div>
+      </div>
+    </nav>
+    <main>
+      <header>
+        <h1>Preču realizācijas vadība</h1>
+        <p><strong>1. kontroldarba konspekts</strong></p>
+        <p class="intro">
+          Galvenās idejas no pieciem materiāliem: 1.1.1., 1.1.2., 1.2., 1.3. un
+          2.1. Atkārtojumi apvienoti; termini un modeļu atšķirības izskaidrotas
+          kopā.
+        </p>
+        <p class="intro">
+          Meklē arī bez garumzīmēm. Sadaļā „Saturs” maini fonu un teksta lielumu
+          (10–22 px).
+        </p>
+      </header>
+      <div class="group-title">Tirgus un klienta vērtība</div>
+      <section
+        class="chapter"
+        id="realizacijas-butiba"
+        data-keywords="PRV definīcija mārketings pārdošana noiets distribūcija izplatīšana realizācija"
+      >
+        <h2 tabindex="-1">
+          <span class="num">01</span>
+          <span class="chapter-title"
+            >Realizācijas vadība un mārketinga loma</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Preču realizācijas vadība</strong> ir uz tirgu un klientu
+            orientēta plānošana, organizēšana, īstenošana un kontrole. Tā veido
+            piemērotu piedāvājumu, nodrošina tā pieejamību un pārdošanu un vada
+            attiecības ar klientiem un partneriem. Mērķis ir vienlaikus
+            <strong
+              >radīt vērtību klientam un sasniegt uzņēmuma realizācijas
+              mērķus</strong
+            >.
+          </p>
+          <dl class="compact">
+            <dt>Mārketings</dt>
+            <dd>
+              Visa uzņēmuma darbības saskaņošana ar tirgu: izprast vajadzības,
+              izveidot vērtīgu piedāvājumu un ietekmēt tā izvēli. Tas ir arī
+              vadīšanas domāšanas veids, ne tikai reklāmas nodaļas darbs.
+            </dd>
+            <dt>Noiets / realizācija plašā nozīmē</dt>
+            <dd>
+              Visas darbības, kas nogādā preces un pakalpojumus līdz klientam:
+              gan darījuma veicināšana, gan fiziskā sadale un attiecību
+              uzturēšana.
+            </dd>
+            <dt>Pārdošana šaurā nozīmē</dt>
+            <dd>
+              Klienta pārliecināšana un darījuma panākšana. Tā ir viena no
+              realizācijas pamatfunkcijām.
+            </dd>
+            <dt>Izplatīšana / distribūcija</dt>
+            <dd>
+              Kanāli un piegādes organizēšana, ar kuriem piedāvājums nonāk pie
+              klienta; īpaši uzsver sadales un loģistikas pusi.
+            </dd>
+          </dl>
+          <p class="key">
+            Vajadzība → vērtības piedāvājums → realizācijas sistēma → darījums →
+            klienta pieredze un apmierinātība → attiecības un atkārtots pirkums.
+          </p>
+          <p>
+            Mārketings dod pārdošanai tirgus izpratni, produktu, cenu ietvaru un
+            komunikācijas atbalstu. Pārdošana savukārt dod mārketingam
+            informāciju par klientu vajadzībām, iebildumiem un konkurentiem.
+            Abas darbības jāsaskaņo.
+          </p>
+        </div>
+        <p class="source">Avots: 1.1.1 · 2.–10. lpp.; 1.3 · 18.–22. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="vajadziba-pieprasijums"
+        data-keywords="vajadzības vēlmes motivācija motīvs pirktspēja pieprasījums piedāvājums transakcija tirgus"
+      >
+        <h2 tabindex="-1">
+          <span class="num">02</span>
+          <span class="chapter-title"
+            >Vajadzība, vēlme, motīvs un pieprasījums</span
+          >
+        </h2>
+        <div class="content">
+          <dl class="compact">
+            <dt>Vajadzība</dt>
+            <dd>
+              Izjusta atšķirība starp esošo un vēlamo stāvokli, piemēram,
+              nepieciešamība pārvietoties.
+            </dd>
+            <dt>Vēlme</dt>
+            <dd>
+              Konkrēts vajadzības apmierināšanas veids: velosipēds, auto vai
+              cits risinājums.
+            </dd>
+            <dt>Motīvs</dt>
+            <dd>
+              Iemesls un pamudinājums rīkoties. Viena vajadzība var radīt
+              dažādus pirkšanas motīvus.
+            </dd>
+            <dt>Pieprasījums</dt>
+            <dd>
+              Vajadzība vai vēlme, kuru pircējs spēj un ir gatavs īstenot tirgū.
+              Izvēli ierobežo nauda, kredīta pieejamība, laiks un citi apstākļi.
+            </dd>
+          </dl>
+          <p>
+            Vajadzību līmeņi materiālā:
+            <strong
+              >eksistence, ierastā dzīvesveida uzturēšana, piederība,
+              cieņa/statuss un pašrealizācija</strong
+            >. Tie palīdz saprast meklēto labumu. Vajadzība pati par sevi vēl
+            nenodrošina pirkumu: vajadzīgs pamudinājums, risinājuma izvēle un
+            iespēja samaksāt.
+          </p>
+          <p>
+            <strong>Apmaiņa</strong> iespējama, ja ir vismaz divas ieinteresētas
+            puses, katrai ir otrai vērtīgs piedāvājums un puses spēj sazināties
+            un to nodot. Preces apmaiņa pret naudu ir transakcija.
+          </p>
+          <p>
+            <strong>Tirgus</strong> var nozīmēt fizisku tirdzniecības vietu,
+            virtuālu apmaiņas vidi, faktisko un potenciālo pircēju/pārdevēju
+            kopumu vai noteiktas produktu kategorijas tirgu. Piedāvājuma un
+            pieprasījuma attiecības regulē arī cena.
+          </p>
+          <p class="key">
+            Realizācijas vadītājam jāzina ne tikai „ko klients pērk?”, bet „kādu
+            vajadzību, kāda motīva dēļ un ar kādām iespējām viņš to dara?”.
+          </p>
+        </div>
+        <p class="source">Avots: 1.1.1 · 11.–23. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="orientaciju-attistiba"
+        data-keywords="ražošanas produkta pārdošanas tirgus klientorientācija attiecību sociālais zaļais digitālais vēsture Mefferts Kotlers"
+      >
+        <h2 tabindex="-1">
+          <span class="num">03</span>
+          <span class="chapter-title">Uzņēmuma orientācijas attīstība</span>
+        </h2>
+        <div class="content">
+          <dl>
+            <dt>Ražošanas orientācija</dt>
+            <dd>
+              Galvenais ir efektīvi un lēti ražot lielā apjomā; pieņem, ka
+              produkcijai atradīsies pircējs. Klienta konkrētās vēlmes nav
+              sākumpunkts.
+            </dd>
+            <dt>Produkta orientācija</dt>
+            <dd>
+              Uzmanība koncentrēta uz pašu produktu un tā pilnveidi. Labs
+              tehniskais risinājums vēl nenozīmē atbilstību tirgus vajadzībai.
+            </dd>
+            <dt>Pārdošanas / noieta orientācija</dt>
+            <dd>
+              Jāpārdod jau saražotais. Spiediens uz pārdošanu var novest pie
+              uzstājīgiem „hard sell” paņēmieniem un uzticības zaudēšanas.
+            </dd>
+            <dt>Tirgus / klienta orientācija</dt>
+            <dd>
+              Sāk ar klienta problēmu un tirgus izpēti; pēc tam pielāgo
+              produktu, cenu, kanālus un komunikāciju.
+            </dd>
+            <dt>Attiecību un sociāli atbildīga orientācija</dt>
+            <dd>
+              Svarīga ir ilgtermiņa uzticība, lojalitāte, sabiedrības labklājība
+              un ietekme uz vidi.
+            </dd>
+            <dt>Digitāli un sociāli savienots mārketings</dt>
+            <dd>
+              Izmanto datus, platformas, sociālos medijus, personalizāciju un
+              dialogu reāllaikā. Informācijas pārbagātība vienlaikus apgrūtina
+              uzmanības iegūšanu.
+            </dd>
+          </dl>
+          <p class="key">
+            Pārdošanas orientācija: „Kā pārdot to, ko ražojam?” Tirgus
+            orientācija: „Ko piedāvāt, lai atrisinātu klienta vajadzību?”
+          </p>
+          <p>
+            Vēsturiskās fāzes pārklājas. Materiāli rāda pāreju no
+            industrializācijas un masu ražošanas uz 4P instrumentiem,
+            stratēģisku vadīšanu, e-komerciju un CRM. Mūsdienu kursa izpratnē
+            tirgus izpratne, klienta vērtība, attiecības un digitālā
+            mijiedarbība darbojas kopā.
+          </p>
+          <p>
+            Uzņēmums var arī orientēties galvenokārt uz īpašnieka ideju,
+            pētījumiem, īstermiņa akciju vērtību vai politisku plānu. Ja šie
+            mērķi aizstāj klienta vajadzību izpratni, uzņēmums nav pilnvērtīgi
+            orientēts uz tirgu.
+          </p>
+          <p class="note">
+            Sociālā atbildība aptver arī sociālo mārketingu (sabiedrībai
+            labvēlīgas uzvedības veicināšanu), zaļo mārketingu un dažādu
+            kultūras grupu vajadzību ievērošanu.
+          </p>
+        </div>
+        <p class="source">Avots: 1.1.1 · 25.–32. lpp.; 1.3 · 4.–16. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="moderna-pardosana"
+        data-keywords="modernā pārdošana sešas 6 KAM Key Account Management Pareto 80 20 klientu portfelis risinājumu pārdošana"
+      >
+        <h2 tabindex="-1">
+          <span class="num">04</span>
+          <span class="chapter-title">Sešas modernās pārdošanas iezīmes</span>
+        </h2>
+        <div class="content">
+          <ol>
+            <li>
+              <strong>Klientu portfeļa vadība.</strong> Klienti atšķiras pēc
+              apjoma, rentabilitātes, potenciāla un apkalpošanas izmaksām.
+              Resursus sadala atbilstoši vērtībai; nozīmīgākajiem izmanto
+              galveno klientu vadību jeb <strong>KAM</strong>. Mazāk rentabliem
+              vispirms optimizē apkalpošanu.
+            </li>
+            <li>
+              <strong>Datu un zināšanu pārvaldība.</strong> Vienoti CRM dati,
+              analītika, pieredzes koplietošana un digitāla procesa integrācija.
+              MI palīdz prognozēt un automatizēt, bet vajadzīgi kvalitatīvi dati
+              un profesionāls spriedums.
+            </li>
+            <li>
+              <strong>Klientu attiecību vadība.</strong> Mērķis ir abpusēji
+              vērtīga ilgtermiņa sadarbība, ne tikai nākamais darījums.
+              Attiecības turpinās arī pēc pirkuma.
+            </li>
+            <li>
+              <strong>Pārdošanas un mārketinga integrācija.</strong> Pārdevējs
+              piedalās piedāvājuma attīstībā un nodod tirgus informāciju pārējām
+              funkcijām; klātienes un digitālie kanāli papildina cits citu.
+            </li>
+            <li>
+              <strong>Problēmu un risinājumu pārdošana.</strong> Pārdevējs
+              darbojas kā konsultants: izprot situāciju, nosaka kritērijus un
+              piedāvā preces, pakalpojumu, zināšanu un servisa kopumu.
+            </li>
+            <li>
+              <strong>Klienta vērtības radīšana.</strong> Pamato konkrēto
+              ieguvumu: ietaupītu laiku, zemākas izmaksas, mazāku risku, lielāku
+              produktivitāti vai ērtumu.
+            </li>
+          </ol>
+          <p class="key">
+            Risinājumu pārdošana pasaka, <strong>kā pārdodam</strong>; klienta
+            vērtība — <strong>kāpēc risinājums klientam ir vajadzīgs</strong>.
+          </p>
+          <p class="note">
+            80/20 princips ir orientieris: neliela klientu daļa var radīt lielu
+            pārdošanas daļu. 2026. gada materiāls uzsver, ka konkrētā proporcija
+            jāpārbauda datos. „Klientu dzēšana” nenozīmē automātiski atteikties
+            no visiem mazajiem klientiem.
+          </p>
+        </div>
+        <p class="source">Avots: 1.1.1 · 33.–40. lpp.; 1.1.2 · 2.–10. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="produkta-limeni"
+        data-keywords="produkts pamatprodukts vispārīgais sagaidāmais paplašinātais papildprodukts potenciālais reālais core actual augmented potential vērtība"
+      >
+        <h2 tabindex="-1">
+          <span class="num">05</span>
+          <span class="chapter-title">Produkts un klienta vērtības līmeņi</span>
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Produkts</strong> plašā nozīmē ir vajadzības apmierināšanas
+            piedāvājums. Tas var būt lietiska prece, pakalpojums, tiesība, ideja
+            vai to kombinācija. Uzņēmumam produkts nes rezultātus, klientam —
+            labumu.
+          </p>
+          <ol>
+            <li>
+              <strong>Pamatprodukts:</strong> galvenais labums, piemēram,
+              pārvietošanās, nevis pats automobilis.
+            </li>
+            <li>
+              <strong>Vispārīgais jeb kategorijas produkts:</strong> īpašības,
+              kas ļauj piedāvājumu atpazīt kā konkrētās kategorijas produktu.
+            </li>
+            <li>
+              <strong>Sagaidāmais produkts:</strong> ieguvumi un īpašības, kurus
+              klients uzskata par pašsaprotamiem — atbilstoša kvalitāte,
+              drošums, ērtums.
+            </li>
+            <li>
+              <strong>Paplašinātais produkts:</strong> papildu vērtība un
+              atšķirības — serviss, garantija, piegāde, konsultācija, zīmols.
+            </li>
+            <li>
+              <strong>Potenciālais produkts:</strong> nākotnes attīstība, jaunas
+              funkcijas un iespējamie uzlabojumi.
+            </li>
+          </ol>
+          <p>
+            Vēlākajos piemēros izmantota arī četru līmeņu versija:
+            <strong
+              >pamatprodukts → reālais produkts → papildprodukts → potenciālais
+              produkts</strong
+            >. Tā ir cita detalizācijas pakāpe, nevis atsevišķs preču
+            iedalījums.
+          </p>
+          <p class="example">
+            <strong>Skaidrojošs piemērs.</strong> Klients pērk ne tikai iekārtu,
+            bet precīzu darbu, konkrētu tehnisko risinājumu, apmācības, rezerves
+            daļu pieejamību un nākotnes modernizācijas iespēju.
+          </p>
+        </div>
+        <p class="source">
+          Avots: 1.1.1 · 41.–42. lpp.; 1.1.2 · 10.–12., 37., 39., 48. lpp.
+        </p>
+      </section>
+      <section
+        class="chapter"
+        id="prece-pakalpojums-serviss"
+        data-keywords="prece pakalpojums serviss nematerialitāte nesaglabājamība cilvēku lietu apkalpošana"
+      >
+        <h2 tabindex="-1">
+          <span class="num">06</span>
+          <span class="chapter-title"
+            >Prece, pakalpojums un pavadošais serviss</span
+          >
+        </h2>
+        <div class="content">
+          <dl class="compact">
+            <dt>Lietiska prece</dt>
+            <dd>Materiāls, redzams un taustāms objekts.</dd>
+            <dt>Pakalpojums</dt>
+            <dd>
+              Darbība vai tās radītais labums, kura vērtība galvenokārt nav
+              materiāla objekta nodošana.
+            </dd>
+            <dt>Serviss</dt>
+            <dd>
+              Pamatpiedāvājumu pavadoša apkalpošana: konsultācija, pieraksts,
+              atbalsts, piegādes koordinēšana vai pēcpārdošanas palīdzība.
+            </dd>
+          </dl>
+          <p>
+            Piedāvājums var būt prece viena pati, prece ar servisu, prece ar
+            pakalpojumu, visu trīs kopums vai pakalpojums ar pavadošo servisu.
+            Mainās materiālās daļas īpatsvars un mijiedarbības nozīme.
+          </p>
+          <p class="example">
+            <strong>Materiāla piemērs.</strong> Ūdens ir prece; ūdens piegāde un
+            notekūdeņu novadīšana ir pakalpojums; ērts klientu portāls un saziņa
+            ir serviss. Klients novērtē visu kopumu.
+          </p>
+          <h3>Pakalpojumu vadīšanas īpatnības</h3>
+          <p>
+            Pakalpojums bieži ir netaustāms, nav uzkrājams kā preču krājums un
+            tā kvalitāti pilnīgāk novērtē sniegšanas laikā vai pēc tās.
+            Rezultātu ietekmē sniedzējs, klients un situācija, tādēļ grūtāk
+            standartizēt kvalitāti, demonstrēt pārsvaru un pamatot cenu.
+          </p>
+          <p>
+            Pakalpojumus iedala pēc saņēmēja — privātiem, ražošanas un
+            sabiedriskiem mērķiem — un pēc objekta:
+            <strong>cilvēku vai lietu apkalpošana</strong>. Var atšķirt klientam
+            maksas un tieši neapmaksātus pakalpojumus; „bez maksas klientam”
+            nenozīmē, ka sniegšanai nav izmaksu.
+          </p>
+          <p class="note">
+            Agrākajos slaidos serviss bieži apzīmēts kā bezmaksas papildinājums;
+            jaunākajā materiālā uzsvērta tā atbalsta funkcija. Klasificējot
+            vienmēr paskaidro, kas ir pamatpiedāvājums un kas to papildina.
+          </p>
+        </div>
+        <p class="source">
+          Avots: 1.1.1 · 42.–52. lpp.; 1.1.2 · 12.–22., 43.–47. lpp.
+        </p>
+      </section>
+      <section
+        class="chapter"
+        id="precu-klasifikacija"
+        data-keywords="FMCG low high involvement patēriņa ražošanas sabiedriskas ilglaicīgas īslaicīgas ikdienas izvēles īpaša pasīvi meklētās kapitālpreces"
+      >
+        <h2 tabindex="-1">
+          <span class="num">07</span>
+          <span class="chapter-title"
+            >Preču iedalījums un pircēja iesaiste</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            Vienu preci var klasificēt pēc vairākiem kritērijiem vienlaikus.
+            Jānosauc, <strong>pēc kādas pazīmes</strong> tā tiek iedalīta.
+          </p>
+          <dl>
+            <dt>Pēc izmantošanas mērķa</dt>
+            <dd>
+              <strong>Patēriņa preces</strong> personīgām vajadzībām;
+              <strong>ražošanas nozīmes preces</strong> citu produktu vai
+              procesu nodrošināšanai;
+              <strong>sabiedriskas nozīmes produkti</strong> kopīgām vajadzībām,
+              piemēram, infrastruktūra.
+            </dd>
+            <dt>Pēc lietošanas ilguma</dt>
+            <dd>
+              <strong>Īslaicīgas</strong> lietošanas preces izlieto ātri;
+              <strong>ilglaicīgas</strong> lieto vairākkārt un ilgstoši.
+            </dd>
+            <dt>Pēc pirkšanas uzvedības</dt>
+            <dd>
+              <strong>Ikdienas pieprasījuma preces</strong> pērk bieži un ar
+              mazu salīdzināšanu. <strong>Izvēles preces</strong> salīdzina pēc
+              cenas, kvalitātes un īpašībām.
+              <strong>Īpaša pieprasījuma preces</strong> meklē noteikta zīmola
+              vai unikāla labuma dēļ.
+              <strong>Pasīvi meklētās preces</strong> parasti nesāk aktīvi
+              meklēt bez vajadzības vai pamudinājuma.
+            </dd>
+            <dt>Pēc iesaistes</dt>
+            <dd>
+              <strong>Low involvement</strong> — mazāka informācijas meklēšana
+              un vienkāršāks lēmums. <strong>High involvement</strong> —
+              nozīmīgāks pirkums, lielāks uztvertais risks, vairāk
+              salīdzināšanas un konsultāciju.
+            </dd>
+          </dl>
+          <p>
+            <strong>FMCG</strong> ir ātras aprites patēriņa preces: parasti
+            samērā lētas, bieži pirktas un ātri izlietojamas. Daļēji izturīgas
+            un ilglietojuma preces parasti pērk retāk; iesaiste bieži ir
+            lielāka.
+          </p>
+          <p>
+            Ražošanas preces ietver
+            <strong
+              >izejvielas, materiālus un komponentes, energonesējus un galvenos
+              ražošanas līdzekļus</strong
+            >
+            (kapitālpreces). Tā pati prece, piemēram, dators, dažādos lietojumos
+            var piederēt citam tirgum.
+          </p>
+          <p class="note">
+            Angļu apzīmējumi izvēles un īpaša pieprasījuma precēm slaidos vietām
+            lietoti nekonsekventi. Šeit kategorijas nošķirtas pēc aprakstītās
+            pirkšanas uzvedības.
+          </p>
+        </div>
+        <p class="source">
+          Avots: 1.1.1 · 54.–55. lpp.; 1.1.2 · 24.–25., 35., 45.–47. lpp.
+        </p>
+      </section>
+      <section
+        class="chapter"
+        id="komplekss-piedavajums"
+        data-keywords="horizontālā vertikālā integrācija sistēma iekārta commodities design-in customized kastomizācija know-how līdzradīšana"
+      >
+        <h2 tabindex="-1">
+          <span class="num">08</span>
+          <span class="chapter-title"
+            >Kompleksi piedāvājumi, pielāgošana un know-how</span
+          >
+        </h2>
+        <div class="content">
+          <h3>Trīs kompleksuma līmeņi</h3>
+          <ul>
+            <li>
+              <strong>Produkta līmenis:</strong> atsevišķa detaļa, modulis vai
+              komponente.
+            </li>
+            <li>
+              <strong>Sistēmas līmenis:</strong> savstarpēji saistītu elementu
+              kopums. Horizontāla paplašināšana pievieno viena līmeņa elementus;
+              vertikāla savienošana integrē atšķirīgas funkcijas un līmeņus.
+            </li>
+            <li>
+              <strong>Iekārtu / kompleksa līmenis:</strong> individuāli
+              projektēta ražošanas vienība, līnija vai cits risinājums no
+              vairākām sistēmām un pakalpojumiem.
+            </li>
+          </ul>
+          <p>
+            Uzņēmuma attīstībā horizontāla paplašināšana var nozīmēt radniecīgu
+            produktu pievienošanu tajā pašā tirgus līmenī.
+            <strong>Vertikāla integrācija</strong> aptver vairāk vērtību ķēdes
+            posmu — piemēram, ražotājs iegādājas izejvielu piegādātāju vai atver
+            savus veikalus.
+          </p>
+          <h3>Klienta līdzdalība izstrādē</h3>
+          <dl class="compact">
+            <dt>Standartizēti masu produkti (commodities)</dt>
+            <dd>
+              Vienāds piedāvājums daudziem; klienta izvēle pārsvarā ir pirkt vai
+              nepirkt. Aizvietojamība ir liela.
+            </dd>
+            <dt>Specializēti produkti (design-in)</dt>
+            <dd>
+              Pielāgoti noteiktām specifikācijām vai izvēlēti no ierobežota
+              parametru un variantu klāsta.
+            </dd>
+            <dt>Kastomizēti produkti</dt>
+            <dd>
+              Individuāls pasūtījums un aktīva klienta līdzradīšana; ciešāka
+              sadarbība ar piegādātāju.
+            </dd>
+          </dl>
+          <p>
+            <strong>Know-how</strong> ir praktiskas zināšanas, kā kaut ko
+            paveikt. Zināšanās balstītam piedāvājumam bieži vajadzīga ieviešana
+            un serviss; tas stiprina ilgtermiņa attiecības un var palielināt
+            piegādātāja maiņas izmaksas.
+          </p>
+        </div>
+        <p class="source">Avots: 1.1.2 · 35.–42. lpp.</p>
+      </section>
+      <div class="group-title">Inovācija un konkurētspēja</div>
+      <section
+        class="chapter"
+        id="inovacija"
+        data-keywords="inovācija novitāte relatīvā priekšrocība savietojamība sarežģītība izmēģināmība novērojamība hibridizācija motivācija"
+      >
+        <h2 tabindex="-1">
+          <span class="num">09</span>
+          <span class="chapter-title">Inovācija un tās pieņemšana</span>
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Inovācija realizācijas vadībā</strong> ir jauna vai būtiski
+            pilnveidota risinājuma ieviešana produktā, procesā, kanālā,
+            apkalpošanā vai biznesa modelī, kas palielina klienta vērtību vai
+            realizācijas efektivitāti. Ideja viena pati vēl nav ieviesta
+            inovācija.
+          </p>
+          <p>
+            Vispārīgi materiālā nošķirtas
+            <strong
+              >produkta, procesa, organizatoriskās un sociālās
+              inovācijas</strong
+            >. Tās var skart gan pašu piedāvājumu, gan to, kā uzņēmums
+            sadarbojas un sniedz labumu.
+          </p>
+          <h3>Piecas pieņemšanu ietekmējošās pazīmes</h3>
+          <ol>
+            <li>
+              <strong>Relatīvā priekšrocība:</strong> vai risinājums ir labāks
+              par esošo?
+            </li>
+            <li>
+              <strong>Savietojamība:</strong> vai tas atbilst klienta
+              vajadzībām, paradumiem un sistēmām?
+            </li>
+            <li>
+              <strong>Sarežģītība:</strong> cik grūti to saprast un lietot?
+            </li>
+            <li>
+              <strong>Izmēģināmība:</strong> vai to var pārbaudīt pirms pilnas
+              izvēles?
+            </li>
+            <li><strong>Novērojamība:</strong> vai ieguvumi ir redzami?</li>
+          </ol>
+          <p>
+            <strong>Produkta inovācijas pakāpes:</strong> esoša produkta
+            uzlabojums; esošās līnijas paplašināšana; uzņēmumam jauna produktu
+            līnija; tirgum būtiski jauns produkts. Jo lielāka novitāte, jo
+            svarīgāk skaidrot vērtību un mazināt klienta risku.
+          </p>
+          <p>
+            Trīs materiālā izceltās izstrādes pieejas:
+            <strong>kategoriju hibridizācija</strong>, esošo funkciju vērtības
+            palielināšana vai vienkāršošana un
+            <strong>zīmola spēka pārnese</strong> uz citu kategoriju ar jaunu
+            komponenti. Motivācija skar gan radītāju/pārdevēju, gan pircēju; to
+            raksturo mērķis, motīvs, ietekmes faktori un centieni.
+          </p>
+          <p class="key">
+            Jaunums jāpārvērš klientam saprotamā, pieejamā un izmēģināmā
+            ieguvumā. Konkurētspēju rada viss piedāvājums, ne tikai tehniska
+            funkcija.
+          </p>
+        </div>
+        <p class="source">Avots: 1.1.2 · 26.–31. lpp.; 2.1 · 3.–5. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="desmit-inovaciju-tipi"
+        data-keywords="10 inovāciju tipi konfigurācija piedāvājums pieredze peļņas modelis tīkls struktūra process veiktspēja kanāls zīmols iesaiste"
+      >
+        <h2 tabindex="-1">
+          <span class="num">10</span>
+          <span class="chapter-title">Desmit inovāciju tipi</span>
+        </h2>
+        <div class="content">
+          <p>
+            Modelis parāda, ka inovācija var notikt visā uzņēmumā, ne tikai
+            produktā.
+          </p>
+          <dl>
+            <dt>Konfigurācija — 1.–4. tips</dt>
+            <dd>
+              <strong>1. Peļņas modelis:</strong> kā uzņēmums pelna.
+              <strong>2. Tīkls:</strong> sadarbība vērtības radīšanai.
+              <strong>3. Struktūra:</strong> cilvēku un aktīvu organizēšana.
+              <strong>4. Process:</strong> darba izpildes veids.
+            </dd>
+            <dt>Piedāvājums — 5.–6. tips</dt>
+            <dd>
+              <strong>5. Produkta veiktspēja:</strong> jaunas vai labākas
+              funkcijas. <strong>6. Produktu sistēma:</strong> savienojami,
+              savstarpēji papildinoši produkti un pakalpojumi.
+            </dd>
+            <dt>Pieredze — 7.–10. tips</dt>
+            <dd>
+              <strong>7. Apkalpošana:</strong> atbalsts un lietošanas
+              uzlabojumi. <strong>8. Kanāls:</strong> kā piedāvājums sasniedz
+              klientu. <strong>9. Zīmols:</strong> piedāvājuma identitāte un
+              uztvere. <strong>10. Klientu iesaiste:</strong> mijiedarbības un
+              attiecību veids.
+            </dd>
+          </dl>
+          <p class="example">
+            <strong>Materiāla piemēra jēga.</strong> Ātrās ēdināšanas inovācija
+            var būt standartizēta, ātra un atkārtojama pasūtījuma izpildes
+            sistēma. Tādējādi vienlaikus mainās process, realizācija, serviss un
+            biznesa mērogošana.
+          </p>
+          <p class="key">
+            Iegaumē trīs grupas:
+            <strong
+              >kā uzņēmums darbojas → ko piedāvā → kādu pieredzi rada</strong
+            >.
+          </p>
+        </div>
+        <p class="source">Avots: 1.1.2 · 32.–34. lpp.</p>
+      </section>
+      <div class="group-title">Tirgus dalībnieki un pirkšana</div>
+      <section
+        class="chapter"
+        id="strategiskais-trijsturis"
+        data-keywords="Simons stratēģiskais trijstūris uzņēmums klients konkurenti noieta partneri selling center pārdošanas centrs"
+      >
+        <h2 tabindex="-1">
+          <span class="num">11</span>
+          <span class="chapter-title"
+            >Stratēģiskais trijstūris un realizācijas dalībnieki</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Simona stratēģiskā trijstūra</strong> stūri ir uzņēmums,
+            klients un konkurenti. Jāizprot klienta vajadzības, paša iespējas un
+            konkurentu piedāvājums. Noieta partneri palīdz sasniegt klientu, bet
+            var strādāt arī ar konkurentiem.
+          </p>
+          <figure class="diagram">
+            <svg
+              viewBox="0 0 340 180"
+              role="img"
+              aria-label="Stratēģiskais trijstūris: klients augšā, uzņēmums un konkurenti apakšā; noieta partneri savieno uzņēmumu un klientu."
+            >
+              <g class="lines">
+                <path d="M170 38L66 139H274Z" />
+                <path class="dash" d="M66 139L170 98V38" />
+              </g>
+              <g class="boxes">
+                <rect x="122" y="5" width="96" height="33" />
+                <rect x="4" y="139" width="124" height="32" />
+                <rect x="212" y="139" width="124" height="32" />
+                <rect x="122" y="77" width="96" height="42" />
+              </g>
+              <g class="labels">
+                <text x="170" y="26">Klients</text>
+                <text x="66" y="160">Uzņēmums</text>
+                <text x="274" y="160">Konkurenti</text>
+                <text x="170" y="94">
+                  <tspan x="170">Noieta</tspan>
+                  <tspan x="170" dy="15">partneri</tspan>
+                </text>
+              </g>
+            </svg>
+            <figcaption>
+              Konkurence ir par klienta izvēli; partneri ir daļa no ceļa līdz
+              klientam.
+            </figcaption>
+          </figure>
+          <p>
+            Četri stratēģiskā darba virzieni:
+            <strong
+              >attīstīt piedāvājumu, strādāt ar klientiem, rīkoties attiecībā
+              pret konkurentiem un veidot sadarbību ar noieta partneriem</strong
+            >.
+          </p>
+          <p>
+            Realizācijā jāņem vērā arī pašu darbinieku intereses. Iekšējais
+            dienests, pārdevēji, serviss un vadība kopā veido
+            <strong>pārdošanas centru (selling center)</strong>. Tā darbam jābūt
+            saskaņotam ar klienta pirkšanas centru.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 3.–4., 8.–10. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="pardosanas-tipi"
+        data-keywords="pasūtījumu pieņēmēji attīstītāji guvēji misionāri merčendaizeri pārdošanas personāls"
+      >
+        <h2 tabindex="-1">
+          <span class="num">12</span>
+          <span class="chapter-title">Pārdošanas lomu un uzdevumu tipi</span>
+        </h2>
+        <div class="content">
+          <dl>
+            <dt>Pasūtījumu pieņēmēji</dt>
+            <dd>
+              Galvenokārt reaģē uz jau esošu pieprasījumu.
+              <strong>Iekšējie</strong> apkalpo klienta izvēli un darījumu;
+              <strong>piegādes pārdevēji</strong> nodrošina preces saņemšanu;
+              <strong>ārējie</strong> apmeklē klientus un pieņem pasūtījumus.
+              Uzticamība palīdz saglabāt pasūtījumus.
+            </dd>
+            <dt>Pasūtījumu veidotāji / attīstītāji</dt>
+            <dd>
+              Veido priekšnoteikumus nākotnes pieprasījumam.
+              <strong>Misionārs-pārdevējs</strong> izglīto un veicina produkta
+              ieteikšanu vai iekļaušanu izvēlē, nevis obligāti pats noslēdz
+              darījumu.
+            </dd>
+            <dt>Pasūtījumu guvēji</dt>
+            <dd>
+              Aktīvi iegūst klientus un pārdošanu. Pirmajā līnijā darbojas jaunu
+              klientu, organizāciju un patērētāju pārdevēji; viņus atbalsta
+              tehniskie speciālisti un <strong>merčendaizeri</strong>, kas
+              palīdz preces izvietošanai un virzībai tirdzniecības vietā.
+            </dd>
+          </dl>
+          <p class="key">
+            Pieņēmējs apkalpo pieprasījumu; attīstītājs to sagatavo; guvējs
+            aktīvi panāk pasūtījumu.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 5.–7. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="b2c-b2b"
+        data-keywords="B2C B2B business consumer organizāciju patērētāju tirgus individuāls grupas pirkums"
+      >
+        <h2 tabindex="-1">
+          <span class="num">13</span>
+          <span class="chapter-title">B2C un B2B pirkumu atšķirības</span>
+        </h2>
+        <div class="content">
+          <p>
+            <strong>B2C</strong> ir pārdošana gala patērētājam personīgām
+            vajadzībām. <strong>B2B</strong> ir darījumi starp organizācijām to
+            darbības, ražošanas vai tālākpārdošanas vajadzībām.
+          </p>
+          <dl>
+            <dt>B2C raksturīgais</dt>
+            <dd>
+              Biežāk individuāls vai mājsaimniecības lēmums; būtiskas ir
+              emocijas, gaume, dzīvesveids, ģimene un sociālās grupas. Tomēr var
+              būt arī rūpīga, racionāla izvērtēšana.
+            </dd>
+            <dt>B2B raksturīgais</dt>
+            <dd>
+              Mazāks lielu pircēju skaits, sarežģītākas prasības un ilgākas
+              attiecības. Biežāk formāla salīdzināšana, sarunas, specifikācijas
+              un vairāku cilvēku iesaiste. Svarīga piegādes drošība, tehniskā
+              atbilstība un serviss.
+            </dd>
+          </dl>
+          <p>
+            B2B lēmumi nav brīvi no personiskām un psiholoģiskām ietekmēm: arī
+            speciālistiem ir pieredze, preferences, reputācijas un karjeras
+            apsvērumi. Vienlaikus B2C lēmumu var pieņemt grupa.
+          </p>
+          <p>
+            Klienta izpratnei atbild uz pieciem jautājumiem:
+            <strong
+              >kas ietekmē lēmumu, kā pērk, pēc kādiem kritērijiem izvēlas, kur
+              un kad pērk?</strong
+            >
+          </p>
+          <p class="key">
+            Atšķirību nosaka ne tikai prece, bet arī pircējs, lietojuma mērķis
+            un lēmuma pieņemšanas organizācija.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 11.–17., 21., 27.–28., 43. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="pirksanas-lomas"
+        data-keywords="LPV buying center pirkšanas centrs iepirkumu centrs iniciators ierosinātājs ietekmētājs lēmējs pircējs lietotājs vārtsargs gatekeeper"
+      >
+        <h2 tabindex="-1">
+          <span class="num">14</span>
+          <span class="chapter-title"
+            >Pircējs, lietotājs un pirkšanas centrs</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            Pircējs, maksātājs, lēmējs un lietotājs ne vienmēr ir viens cilvēks.
+            Vienai personai var būt vairākas lomas, un grupas sastāvs procesa
+            gaitā var mainīties.
+          </p>
+          <dl class="compact">
+            <dt>Ierosinātājs / iniciators</dt>
+            <dd>Pamana vajadzību un sāk pirkuma apsvēršanu.</dd>
+            <dt>Ietekmētājs</dt>
+            <dd>
+              Piedāvā informāciju, vērtēšanas kritērijus un ietekmē citu
+              viedokli.
+            </dd>
+            <dt>Lēmējs</dt>
+            <dd>
+              Pieņem vai apstiprina galīgo izvēli; būtiskos darījumos lēmēji var
+              būt vairāki.
+            </dd>
+            <dt>Pircējs / iepircējs</dt>
+            <dd>
+              Organizē darījumu, vienojas par nosacījumiem un izpilda pirkšanas
+              procedūru.
+            </dd>
+            <dt>Lietotājs</dt>
+            <dd>
+              Faktiski izmanto produktu; viņa vajadzības un pieredze ietekmē
+              piemērotības vērtējumu.
+            </dd>
+            <dt>Vārtsargs (gatekeeper)</dt>
+            <dd>
+              Kontrolē piekļuvi informācijai un cilvēkiem. Var atbalstīt vai
+              bloķēt pārdevēja kontaktu.
+            </dd>
+          </dl>
+          <p>
+            <strong>Pirkšanas centrs / LPV</strong> ir organizācijas lēmumu
+            pieņemšanā iesaistīto cilvēku kopums. B2C shēmā parasti izceļ pirmās
+            piecas lomas; B2B īpaši nozīmīga ir arī vārtsarga loma.
+          </p>
+          <p class="key">
+            Pārdevējam jāatrod cilvēki ar reālu ietekmi. Nedrīkst visu laiku
+            veltīt tikai patīkamam sarunu biedram vai cilvēkam, kurš var pateikt
+            „nē”, bet nevar pateikt „jā”.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 18., 28.–31., 39.–43., 56. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="b2b-process"
+        data-keywords="buygrid pirkšanas režģis Robinsons Fariss Vinds 7 8 posmi jauns modificēts tiešs atkārtots pirkums struktūra process saturs"
+      >
+        <h2 tabindex="-1">
+          <span class="num">15</span>
+          <span class="chapter-title"
+            >B2B pirkšanas process un pirkšanas režģis</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            Organizācijas pirkšanu analizē trīs griezumos:
+            <strong>struktūra — kurš?</strong>, <strong>process — kā?</strong>,
+            <strong>saturs — pēc kādiem kritērijiem?</strong>
+          </p>
+          <h3>Pirkšanas procesa pamata secība</h3>
+          <ol>
+            <li>Apzinās problēmu vai vajadzību.</li>
+            <li>
+              Nosaka prasības, īpašības, kvalitāti un vajadzīgo daudzumu;
+              sagatavo specifikāciju.
+            </li>
+            <li>Meklē un pārbauda potenciālos piegādātājus.</li>
+            <li>Iegūst un analizē piedāvājumus.</li>
+            <li>Novērtē piedāvājumus un izvēlas piegādātāju.</li>
+            <li>Vienojas par pasūtījuma, apmaksas un piegādes kārtību.</li>
+            <li>Novērtē izpildi un iegūst atgriezenisko saiti.</li>
+          </ol>
+          <p class="note">
+            44.–45. lpp. ir septiņi posmi. 54. lpp. prasību noteikšana un to
+            izklāstīšana nodalīta, tādēļ iegūti astoņi. Galvenā procesa loģika
+            ir tā pati.
+          </p>
+          <h3>Trīs pirkšanas klases</h3>
+          <dl>
+            <dt>Tiešs atkārtots pirkums</dt>
+            <dd>
+              Ierastais pasūtījums bez būtiskām izmaiņām; maz informācijas
+              meklējumu un iesaistīto. Jaunam piegādātājam jāpamato labāks
+              ieguvums.
+            </dd>
+            <dt>Modificēts atkārtots pirkums</dt>
+            <dd>
+              Maina produktu, specifikāciju, cenu, piegādātāju vai nosacījumus.
+              Vajadzīga salīdzināšana un bieži plašāka speciālistu iesaiste.
+            </dd>
+            <dt>Jauns uzdevums</dt>
+            <dd>
+              Pirmais šāda veida pirkums; visvairāk neskaidrības, informācijas
+              un iesaistīto, īpaši, ja darījums ir dārgs vai riskants.
+            </dd>
+          </dl>
+          <p>
+            <strong>Pirkšanas režģis (buygrid)</strong>, Robinsona, Farisa un
+            Vinda modelis, apvieno pirkšanas klases un procesa fāzes matricā.
+            Katrai kombinācijai noskaidro lēmuma dalībniekus, vajadzīgo
+            informāciju un vērtēšanas kritērijus, lai piedāvātu piemērotu
+            vēstījumu īstajā laikā.
+          </p>
+          <p>
+            Procesu ietekmē arī produkta tips un pirkuma nozīmīgums. Modeļa
+            ierobežojumi: koncentrēšanās uz precēm, nepilnīga piegādātāja
+            perspektīva un nepietiekama darījuma nozīmīguma atspoguļošana.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 27., 44.–45., 48.–55. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="b2b-kriteriji"
+        data-keywords="izvēles kritēriji kvalitāte TQM dzīves cikla izmaksas uzticamība piegādes nepārtrauktība funkcionālie psiholoģiskie"
+      >
+        <h2 tabindex="-1">
+          <span class="num">16</span>
+          <span class="chapter-title"
+            >B2B izvēles kritēriji un uztvertā vērtība</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            Dažādi pirkšanas centra dalībnieki vērtē pēc atšķirīgiem
+            kritērijiem. Iepircējs var uzsvērt cenu, ražošana — nepārtrauktību,
+            bet tehniskais speciālists — savietojamību un veiktspēju.
+          </p>
+          <dl>
+            <dt>Funkcionālie un ekonomiskie kritēriji</dt>
+            <dd>
+              Kvalitāte un tās stabilitāte, cena, produktivitāte, piegādes
+              nepārtrauktība, uzticamība, izturība, inovācija, tehniskais un
+              komerciālais atbalsts, drošība.
+            </dd>
+            <dt>Dzīves cikla izmaksas</dt>
+            <dd>
+              Ne tikai iegādes cena, bet arī ar lietošanu un uzturēšanu
+              saistītās izmaksas. Lētāka iegāde var izrādīties dārgāka
+              ekspluatācijā.
+            </dd>
+            <dt>Psiholoģiskie un organizatoriskie kritēriji</dt>
+            <dd>
+              Uzticēšanās, prestižs, personīgais risks, ērtība, attiecības,
+              savstarpējība un uzņēmuma iekšējā politika. Tie īpaši ietekmē
+              izvēli starp līdzīgiem piedāvājumiem.
+            </dd>
+          </dl>
+          <p>
+            Materiāls uzsver kvalitātes vadību (<strong>TQM</strong>) un
+            piegādes nepārtrauktību: ražošanas apstāšanās var būt dārgāka par
+            cenas starpību.
+          </p>
+          <p class="key">
+            Piedāvājumu pielāgo ne tikai uzņēmumam kopumā, bet arī konkrētās
+            lomas atbildībai un vērtēšanas kritērijiem.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 46.–50. lpp.; 2.1 · 40.–41. lpp.</p>
+      </section>
+      <div class="group-title">Pircēja uzvedība un tās izpēte</div>
+      <section
+        class="chapter"
+        id="pateretaja-process"
+        data-keywords="pirkšanas 5 posmi pamudinājums meklēšana atlase lēmums apstiprinājums rutīna impulss panika ierobežota ekstensīva piespiedu"
+      >
+        <h2 tabindex="-1">
+          <span class="num">17</span>
+          <span class="chapter-title">Patērētāja ceļš līdz pirkumam</span>
+        </h2>
+        <div class="content">
+          <ol>
+            <li>
+              <strong>Pamudinājums:</strong> atpazīst vajadzību vai problēmu.
+            </li>
+            <li>
+              <strong>Meklēšana:</strong> iegūst informāciju no savas pieredzes
+              un ārējiem avotiem.
+            </li>
+            <li>
+              <strong>Atlase:</strong> salīdzina risinājumus pēc sev būtiskiem
+              kritērijiem.
+            </li>
+            <li>
+              <strong>Lēmums un darījums:</strong> izvēlas preci, pārdevēju,
+              laiku un nosacījumus.
+            </li>
+            <li>
+              <strong>Pēcpirkuma vērtējums / apstiprinājums:</strong> salīdzina
+              gaidīto ar pieredzi; veidojas apmierinātība, atsauksmes un nākamā
+              izvēle.
+            </li>
+          </ol>
+          <p>
+            Alternatīvu vērtēšanā saistās
+            <strong
+              >kritēriji → pārliecība par īpašībām → attieksme → nodoms</strong
+            >. Nodoms vēl negarantē darījumu: to var mainīt nepieejamība, cena,
+            piegāde, citu viedoklis vai papildu izmaksas.
+          </p>
+          <h3>Izvērtēšanas intensitāte</h3>
+          <p>
+            <strong>Plašā problēmu risināšanā</strong> izvēle ir jauna vai
+            sarežģīta un informācijas vajag daudz.
+            <strong>Ierobežotā</strong> ir pieredze, bet salīdzina dažas
+            alternatīvas. <strong>Automātiskā reakcijā</strong> darbojas rutīna
+            un iepriekšējā uzticība.
+          </p>
+          <h3>Pirkumu formas</h3>
+          <p>
+            <strong>Rutīnas</strong> pirkums balstās pieredzē;
+            <strong>impulsa</strong> — tūlītējā pamudinājumā;
+            <strong>panikas</strong> — bailēs un nemierā;
+            <strong>ierobežotas problēmas risinājums</strong> — apdomātā
+            salīdzināšanā; <strong>ekstensīvs</strong> — nozīmīgā un riskantā
+            lēmumā; <strong>piespiedu</strong> — sociālā spiedienā. Dažādām
+            formām vajag atšķirīgu informāciju un atbalstu.
+          </p>
+          <p class="key">
+            Piedāvājumam jābūt atrodamam, saprotamam, uzticamam un pieejamam
+            tad, kad klients to meklē. Pēc darījuma darbs ar klientu turpinās.
+          </p>
+        </div>
+        <p class="source">
+          Avots: 1.1.1 · 17.–21. lpp.; 1.2 · 19.–20., 53., 61.–69. lpp.
+        </p>
+      </section>
+      <section
+        class="chapter"
+        id="psihologiskie-faktori"
+        data-keywords="selektīva iedarbība uztvere saglabāšana attieksme izziņas emocionālais gribas risks finansiālais funkcionālais fiziskais sociālais psiholoģiskais laika awareness evoked"
+      >
+        <h2 tabindex="-1">
+          <span class="num">18</span>
+          <span class="chapter-title"
+            >Motivācija, uztvere, attieksme un risks</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Motivācija</strong> aktivizē vēlmi apmierināt vajadzību.
+            Pirkšanas īstais iemesls ne vienmēr ir skaidri pateikts; pārdevējam
+            tas jānoskaidro un jāsaista risinājums ar ieguvumu.
+          </p>
+          <h3>Trīs selektīvie procesi</h3>
+          <dl class="compact">
+            <dt>Selektīva iedarbība</dt>
+            <dd>Klients izvēlas tikai daļu informācijas avotu.</dd>
+            <dt>Selektīva uztvere</dt>
+            <dd>No saņemtā pamana un interpretē tikai daļu.</dd>
+            <dt>Selektīva saglabāšana</dt>
+            <dd>Atceras tikai daļu uztvertās informācijas.</dd>
+          </dl>
+          <p>
+            <strong>Attieksmi</strong> veido izziņas komponents (ko zinu un
+            domāju), emocionālais (ko jūtu) un gribas komponents (vai grasos
+            rīkoties). Patika pati par sevi vēl nav pirkums.
+          </p>
+          <h3>Seši uztvertie riski</h3>
+          <ul>
+            <li>
+              <strong>Finansiālais:</strong> iespējamais naudas zaudējums.
+            </li>
+            <li>
+              <strong>Funkcionālais:</strong> vai produkts darbosies, kā
+              gaidīts?
+            </li>
+            <li>
+              <strong>Fiziskais:</strong> iespējamais kaitējums lietošanā.
+            </li>
+            <li><strong>Sociālais:</strong> citu cilvēku vērtējums.</li>
+            <li>
+              <strong>Psiholoģiskais:</strong> kā izvēle saskan ar paštēlu un
+              pašsajūtu?
+            </li>
+            <li>
+              <strong>Laika:</strong> iegādei, apguvei vai kļūdas labošanai
+              vajadzīgais laiks.
+            </li>
+          </ul>
+          <p>
+            Izvēles loks sašaurinās: no visām klientam zināmajām precēm līdz
+            iepriekš apsvērtām alternatīvām un lēmuma brīdī pieejamajiem
+            variantiem. Materiālā lietoti nosaukumi
+            <em>Awareness Set, Processed Set, Evoked Set</em>.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 24., 58.–62. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="personigas-socialas-ietekmes"
+        data-keywords="personīgās sociālās ietekmes dzīvesveids psihogrāfija referentās grupas kultūra ģimene dominējošs pakļāvīgs silts naidīgs"
+      >
+        <h2 tabindex="-1">
+          <span class="num">19</span>
+          <span class="chapter-title">Personiskās un sociālās ietekmes</span>
+        </h2>
+        <div class="content">
+          <p>
+            Pirkšanu ietekmē
+            <strong>situācija, personiskie faktori un sociālā vide</strong>.
+            Nozīmīgi ir ienākumi, vecums, dzīvesveids, pieredze, vērtības,
+            kultūra, ģimene, sociālā klase un referentās grupas — cilvēki, ar
+            kuriem klients salīdzina sevi vai kuru viedoklis ir svarīgs.
+          </p>
+          <p>
+            <strong>Psihogrāfija</strong> raksturo dzīvesveidu, intereses,
+            uzskatus un vērtības. Tā palīdz izskaidrot, kāpēc demogrāfiski
+            līdzīgi cilvēki izvēlas atšķirīgi. Materiāla detalizētās
+            mājsaimniecību un sociālo klašu tabulas ir segmentēšanas piemēri,
+            nevis obligāts katra cilvēka apraksts.
+          </p>
+          <h3>Četri saskarsmes tipi materiāla modelī</h3>
+          <dl class="compact">
+            <dt>Dominējošs–naidīgs</dt>
+            <dd>
+              Prasīgs un skeptisks; vajadzīga cieņpilna, tieša un pārliecinoša
+              saruna.
+            </dd>
+            <dt>Pakļāvīgs–naidīgs</dt>
+            <dd>
+              Noslēgts un piesardzīgs; uzticību veido pakāpeniski, bez
+              dominēšanas un ar atvērtiem jautājumiem.
+            </dd>
+            <dt>Pakļāvīgs–silts</dt>
+            <dd>
+              Draudzīgs, orientēts uz attiecībām; uztur siltu kontaktu un palīdz
+              nonākt līdz lēmumam.
+            </dd>
+            <dt>Dominējošs–silts</dt>
+            <dd>
+              Atvērts, lietišķs un prasīgs; vajadzīgi argumenti un pierādījumi,
+              saglabājot empātiju.
+            </dd>
+          </dl>
+          <p class="key">
+            Modeļa jēga ir pielāgot komunikāciju novērotajai uzvedībai. Tipi nav
+            diagnozes vai nemainīgas cilvēku kategorijas.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 20.–26., 71.–72. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="uzvedibas-izpete"
+        data-keywords="melnā kaste stimuli reakcija izpēte pētniecība strukturētās procesu prognožu metodes novērošana"
+      >
+        <h2 tabindex="-1">
+          <span class="num">20</span>
+          <span class="chapter-title"
+            >Uzvedības „melnā kaste” un izpētes metodes</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            Novērot var ārējos stimulus un reakciju — piedāvājumu, cenu,
+            pārdošanas vidi un faktisko pirkumu. Iekšējais ceļš līdz lēmumam jeb
+            <strong>„melnā kaste”</strong> nav tieši redzams.
+          </p>
+          <div
+            class="flow"
+            aria-label="Stimuli, pircēja iekšējie procesi un reakcija"
+          >
+            <span><strong>Stimuli</strong><br />Cena, prece, vide, saziņa</span
+            ><span
+              ><strong>Iekšējie procesi</strong><br />Motīvi, uztvere,
+              zināšanas, vērtības</span
+            ><span
+              ><strong>Reakcija</strong><br />Izvēle, daudzums, pirkums vai
+              atteikums</span
+            >
+          </div>
+          <dl>
+            <dt>Vispārējās metodes</dt>
+            <dd>
+              Cenšas izprast uzvedību kopumā. Visu faktoru pilnīga aptveršana
+              praksē ir ļoti grūta.
+            </dd>
+            <dt>Strukturētās metodes</dt>
+            <dd>
+              Izvēlas savstarpēji saistītus mainīgos, salīdzina pircējus un
+              veido tipus; pamato segmentēšanu.
+            </dd>
+            <dt>Procesu izpēte</dt>
+            <dd>Analizē darbību secību un atsevišķos lēmuma posmus.</dd>
+            <dt>Prognožu metodes</dt>
+            <dd>Ar modeļiem novērtē pirkuma iespējamību.</dd>
+          </dl>
+          <p>
+            Izpētē jautā par personas lomu, motīviem, novērojamiem un iekšējiem
+            ietekmes faktoriem, situāciju un apkārtni. Informāciju iegūst no
+            klientiem, darījumu datiem, tirgus statistikas un nozaru/uzņēmumu
+            pārskatiem.
+          </p>
+          <p class="note">
+            Materiālā minēti arī astoņi mārketinga veiksmes atbalsta faktori:
+            novērošana, problēmu risinājumi, pakalpojumi, zīmola vīzija un
+            izpausme, attiecības, instrumenti un sistēmas. Tie apvieno izpratni
+            ar praktisku darbību.
+          </p>
+        </div>
+        <p class="source">
+          Avots: 1.1.1 · 12., 24. lpp.; 1.2 · 57.–58., 70.–72. lpp.
+        </p>
+      </section>
+      <section
+        class="chapter"
+        id="ietekmetaji"
+        data-keywords="influencer ietekmētāji eksperti viedokļu līderi 1 9 90 sasniedzamība atbilstība rezonanse atsauces"
+      >
+        <h2 tabindex="-1">
+          <span class="num">21</span>
+          <span class="chapter-title"
+            >Eksperti, ietekmētāji un modelis 1 : 9 : 90</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            B2B izvēli palīdz ietekmēt profesionāli uzticami avoti: nozares
+            eksperti, analītiķi, konsultanti un viedokļu līderi. Vērtība ir
+            atbilstošā informācijā un uzticībā, ne tikai sekotāju skaitā.
+          </p>
+          <dl class="compact">
+            <dt>Eksperts</dt>
+            <dd>
+              Ir dziļas zināšanas vai prasmes; auditorija var būt neliela.
+            </dd>
+            <dt>Ietekmētājs</dt>
+            <dd>
+              Spēj sasniegt un iesaistīt auditoriju; ekspertīzes dziļums
+              atšķiras.
+            </dd>
+            <dt>Viedokļu līderis</dt>
+            <dd>
+              Apvieno autoritāti konkrētajā jomā ar spēju ietekmēt citu uzskatus
+              un izvēli.
+            </dd>
+          </dl>
+          <h3>1 : 9 : 90 — līdzdalības modelis</h3>
+          <ul>
+            <li><strong>1%</strong> rada saturu un virza viedokļus.</li>
+            <li><strong>9%</strong> aktīvi komentē, iesaka un izplata.</li>
+            <li><strong>90%</strong> galvenokārt lasa un patērē saturu.</li>
+          </ul>
+          <p>
+            Ietekmētāju izvēlē vērtē <strong>sasniedzamību</strong> (auditorijas
+            apjomu), <strong>atbilstību</strong> (saikni ar jomu),
+            <strong>rezonansi</strong> (iesaisti un izplatīšanos) un
+            <strong>atsauces</strong> (atzinību citu autoritāšu vidū).
+          </p>
+          <p class="note">
+            1 : 9 : 90 ir materiālā izmantots modelis, nevis precīzs katra
+            tirgus sadalījums. Slaidos minētie efektivitātes procenti ir
+            konkrētu pētījumu piemēri; konspekta galvenā atziņa ir vērtēt reālu
+            ietekmi un atbilstību.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 32.–38., 40. lpp.</p>
+      </section>
+      <div class="group-title">Segmentēšana un individualizācija</div>
+      <section
+        class="chapter"
+        id="segmentesanas-butiba"
+        data-keywords="segmentēšana segments mērķauditorija mērķa grupa izmērāms sasniedzams diferencējams apjoms potenciāls"
+      >
+        <h2 tabindex="-1">
+          <span class="num">22</span>
+          <span class="chapter-title">Segmentēšana un mērķa grupas izvēle</span>
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Tirgus segmentēšana</strong> ir pircēju apvienošana grupās
+            ar līdzīgām vajadzībām, pazīmēm vai uzvedību.
+            <strong>Mērķa grupas atlase</strong> ir izvēle, kurus segmentus
+            uzņēmums apkalpos. Segmentēt nenozīmē automātiski apkalpot visus.
+          </p>
+          <p>
+            Process:
+            <strong
+              >izpētīt pircējus un nepircējus → noteikt līdzīgas grupas →
+              novērtēt potenciālu → atlasīt mērķa grupu → pielāgot piedāvājumu
+              un pārdošanu</strong
+            >.
+          </p>
+          <h3>Noderīga segmenta prasības</h3>
+          <ul>
+            <li><strong>Izmērāms:</strong> to var raksturot un novērtēt.</li>
+            <li>
+              <strong>Pietiekami apjomīgs:</strong> ir ekonomisks potenciāls.
+            </li>
+            <li>
+              <strong>Sasniedzams:</strong> ar kanāliem un komunikāciju var
+              panākt kontaktu.
+            </li>
+            <li>
+              <strong>Atšķirams:</strong> būtiski atšķiras no citām grupām.
+            </li>
+            <li>
+              <strong>Ekonomiski apkalpojams:</strong> ieguldījumi ir samērīgi
+              ar sagaidāmo rezultātu.
+            </li>
+          </ul>
+          <p class="key">
+            Precīzāka mērķēšana samazina izšķērdētu komunikāciju, palīdz pamanīt
+            tirgus nepilnības un koncentrēt resursus uz piemērotākajiem
+            klientiem.
+          </p>
+        </div>
+        <p class="source">
+          Avots: 1.2 · 13., 56., 73.–75. lpp.; 1.3 · 12.–14. lpp.
+        </p>
+      </section>
+      <section
+        class="chapter"
+        id="segmentesanas-kriteriji"
+        data-keywords="demogrāfiskie ģeogrāfiskie sociāli ekonomiskie psihogrāfiskie uzvedības segmentācijas kritēriji nozare lielums"
+      >
+        <h2 tabindex="-1">
+          <span class="num">23</span>
+          <span class="chapter-title">B2C un B2B segmentēšanas kritēriji</span>
+        </h2>
+        <div class="content">
+          <dl>
+            <dt>B2C: demogrāfiskie un ģeogrāfiskie</dt>
+            <dd>
+              Vecums, ģimenes stāvoklis, mājsaimniecība, dzīvesvieta un reģions.
+            </dd>
+            <dt>B2C: sociāli ekonomiskie</dt>
+            <dd>Izglītība, profesija, ienākumi, pirktspēja un īpašums.</dd>
+            <dt>B2C: psihogrāfiskie</dt>
+            <dd>
+              Personība, dzīvesveids, intereses, vērtības, attieksmes un
+              gatavība riskēt.
+            </dd>
+            <dt>B2C: uzvedības un meklēto ieguvumu</dt>
+            <dd>
+              Pirkšanas biežums, laiks, apjoms, vieta, maksāšanas veids,
+              lietošanas intensitāte, lojalitāte, reakcija uz piedāvājumiem un
+              vēlamais labums.
+            </dd>
+          </dl>
+          <p>
+            <strong>B2B</strong> kritērijus pielāgo organizācijai: nozare,
+            atrašanās vieta, lielums, juridiskā forma, tehnoloģija un
+            aprīkojums, produkta lietojums, finansiālās iespējas, iepirkumu
+            budžets un potenciāls.
+          </p>
+          <p>
+            Papildus analizē iepirkumu uzvedību, piegādes termiņus, maksājumu un
+            krājumu politiku, risku un esošo piegādātāju daļas. Psihogrāfiskās
+            pazīmes attiecas uz pirkšanā iesaistītajiem cilvēkiem.
+          </p>
+          <p class="key">
+            B2C raksturo cilvēku un viņa patēriņu; B2B — organizāciju, tās
+            iepirkumu situāciju un lēmuma dalībniekus.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 74., 76.–77. lpp.; 1.3 · 14. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="individuals-marketings"
+        data-keywords="masu nediferencēts diferencēts koncentrēts niša viens pret vienu individualizācija specializācija produkts tirgus"
+      >
+        <h2 tabindex="-1">
+          <span class="num">24</span>
+          <span class="chapter-title"
+            >No masu pieejas līdz „viens pret vienu”</span
+          >
+        </h2>
+        <div class="content">
+          <dl>
+            <dt>Nediferencēts masu mārketings</dt>
+            <dd>Viens vispārīgs piedāvājums plašam tirgum.</dd>
+            <dt>Diferencēts mārketings</dt>
+            <dd>Dažādi piedāvājumi vairākiem segmentiem.</dd>
+            <dt>Specializācija</dt>
+            <dd>
+              <strong>Pēc produkta:</strong> vienu produktu vai risinājumu
+              piedāvā vairākiem segmentiem. <strong>Pēc tirgus:</strong> vienu
+              segmentu apkalpo ar vairākiem produktiem. Izlases specializācijā
+              atlasa noteiktas produktu–segmentu kombinācijas.
+            </dd>
+            <dt>Koncentrēts / nišas mārketings</dt>
+            <dd>
+              Resursus koncentrē šauri definētā segmentā ar īpašām vajadzībām.
+            </dd>
+            <dt>Individuāls mārketings („viens pret vienu”)</dt>
+            <dd>
+              Atsevišķu klientu uztver kā mērķa grupu; pielāgo kontaktu un
+              piedāvājumu viņa vajadzībām.
+            </dd>
+          </dl>
+          <p>
+            Atšķiras divas pakāpes:
+            <strong>piedāvājuma specializācija</strong> un
+            <strong>kontakta individualizācija</strong>. Individuāls kontakts
+            vēl nenozīmē individuāli izgatavotu preci.
+          </p>
+          <p>
+            Materiāls uzsver pāreju uz sīkākiem segmentiem, jo produkti kļūst
+            līdzīgāki un vienāda komunikācija neuzrunā visus. CRM un dati ļauj
+            personalizēt sadarbību.
+          </p>
+          <p class="note">
+            Slaidos „koncentrēts”, „nišas” un „individuāls” vietām lietoti tuvu.
+            Atšķirību iegaumē pēc apkalpotās vienības: šaurs segments vai
+            konkrēts klients.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 78.–82. lpp.</p>
+      </section>
+      <div class="group-title">Uzņēmuma vadīšana un attiecības</div>
+      <section
+        class="chapter"
+        id="triades-koncepcija"
+        data-keywords="triāde trijāde divējādais mārketings amerikāņu vācu modelis funkcijas organizācija integrācija"
+      >
+        <h2 tabindex="-1">
+          <span class="num">25</span>
+          <span class="chapter-title"
+            >Mārketinga divējādā izpratne un triāde</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            Mārketingam ir divējāda nozīme:
+            <strong>visa uzņēmuma vadīšanas filozofija</strong> un
+            <strong>konkrētu funkciju un pakalpojumu kopums</strong> — izpēte,
+            produktu vadība, komunikācija, plānošana un atbalsts pārdošanai.
+          </p>
+          <h3>Triādes trīs prasības</h3>
+          <ol>
+            <li>
+              <strong
+                >Augstākā vadība ievēro tirgus/klienta orientāciju.</strong
+              >
+              Klienta vajadzības salāgo ar pašu resursiem, konkurenci,
+              tehnoloģiju un vides prasībām.
+            </li>
+            <li>
+              <strong>Realizācija ir līdzvērtīga citām pamatfunkcijām.</strong>
+              Tai ir savi tirgus mērķi, stratēģijas, instrumenti un kontrole.
+            </li>
+            <li>
+              <strong>Mārketinga pakalpojumi atbalsta visas funkcijas.</strong>
+              Tirgus informācijai un vajadzīgajiem atbalsta materiāliem jābūt
+              pieejamiem visā uzņēmumā.
+            </li>
+          </ol>
+          <h3>Materiāla organizācijas modeļu salīdzinājums</h3>
+          <p>
+            <strong>Amerikāņu modelī</strong> mārketings plaši aptver produkta,
+            cenas, sadales un komunikācijas politiku; pārdošana saistās ar
+            vairākām jomām. <strong>Vācu modelī</strong> mārketinga pakalpojumu
+            un realizācijas nodaļas ir nošķirtas zem kopīgas vadības.
+          </p>
+          <p>
+            Uz pārdošanu orientēta uzņēmuma struktūrā mārketinga pakalpojumi var
+            būt pakārtoti pārdošanai. Uz mārketingu orientētā uzņēmumā klientu
+            vajadzību izpratne koordinē plašāku darbību kopumu. Būtiska ir
+            funkciju integrācija, ne tikai nodaļas nosaukums.
+          </p>
+          <p class="key">
+            Klientorientāciju neveido viena nodaļa: katrs darbinieks savā darbā
+            ietekmē klienta pieredzi, uzņēmuma tēlu un rezultātu.
+          </p>
+        </div>
+        <p class="source">Avots: 1.3 · 18.–30., 39.–43. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="tirgus-orientacijas-prasibas"
+        data-keywords="pieci 5 orientācijas virzieni desmit 10 prasības labuma uzvedības informācijas stratēģiskais koordinēšana sistēma sociālais vide"
+      >
+        <h2 tabindex="-1">
+          <span class="num">26</span>
+          <span class="chapter-title"
+            >Pieci orientācijas virzieni un desmit prasības</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Pieci stratēģiskie virzieni:</strong> centrā ir klients;
+            pārējie ir tehnoloģija, konkurence, noieta partneri un rezultāts.
+            Tehnoloģijai jārada klienta labums, konkurencei jāpalīdz atrast
+            atšķirību, partneriem — nodrošināt pieejamību. Rezultāta orientācija
+            pārrauga ekonomisko lietderību.
+          </p>
+          <h3>Desmit prasības tirgus orientētai vadīšanai</h3>
+          <ol>
+            <li>
+              <strong>Labuma aspekts:</strong> orientēties uz klienta ieguvumu.
+            </li>
+            <li>
+              <strong>Uzvedības:</strong> pielāgoties mērķa grupas rīcībai.
+            </li>
+            <li>
+              <strong>Informācijas:</strong> balstīt lēmumus uzticamā
+              informācijā.
+            </li>
+            <li>
+              <strong>Stratēģiskais:</strong> ievērot ilgtermiņa virzienu.
+            </li>
+            <li>
+              <strong>Darbību:</strong> rīkoties sistemātiski, ne tikai reaģēt.
+            </li>
+            <li><strong>Segmentēšanas:</strong> nošķirt pircēju grupas.</li>
+            <li>
+              <strong>Koordinēšanas:</strong> saskaņot nodaļas klienta
+              interesēs.
+            </li>
+            <li>
+              <strong>Sistēmas:</strong> standartizēt un integrēt procesus, arī
+              CRM.
+            </li>
+            <li>
+              <strong>Sociālais:</strong> ņemt vērā sociālās vides pārmaiņas.
+            </li>
+            <li>
+              <strong>Vides aizsardzības:</strong> uzņemties atbildību par
+              ietekmi uz vidi.
+            </li>
+          </ol>
+          <p>
+            Tirgus orientācija palīdz diferencēt produktu un uzlabot
+            apmierinātību, bet viena pati negarantē lielu tirgus daļu. Risks ir
+            tikai sekot jau izteiktām vēlmēm, neattīstot inovācijas; klientu
+            vēlmes un konkurentu darbība mainās.
+          </p>
+        </div>
+        <p class="source">Avots: 1.3 · 31.–34., 55. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="apmierinatiba-lojalitate"
+        data-keywords="tuvība apmierinātība transakcijas dinamiskā noturēšana lojalitāte klienta dzīves cikla vērtība attiecību mārketings"
+      >
+        <h2 tabindex="-1">
+          <span class="num">27</span>
+          <span class="chapter-title"
+            >Tuvība klientam, apmierinātība un lojalitāte</span
+          >
+        </h2>
+        <div class="content">
+          <dl>
+            <dt>Tuvība klientam</dt>
+            <dd>
+              Klienta sajūta, ka uzņēmums izprot viņa intereses, nopietni uztver
+              problēmas un vēlas ilgstošu sadarbību.
+            </dd>
+            <dt>Apmierinātība</dt>
+            <dd>
+              Gaidītās un saņemtās vērtības salīdzinājums.
+              <strong>Transakcijas apmierinātība</strong> attiecas uz konkrētu
+              pirkumu; <strong>dinamiskā</strong> — uz attiecībām visā
+              sadarbības gaitā.
+            </dd>
+            <dt>Noturēšana</dt>
+            <dd>
+              Darbības un apstākļi, kas veicina sadarbības turpināšanu un
+              atkārtotus pirkumus.
+            </dd>
+            <dt>Lojalitāte</dt>
+            <dd>
+              Brīvprātīga piesaiste zīmolam, uzņēmumam, pārdošanas vietai vai
+              pārdevējam.
+            </dd>
+          </dl>
+          <p>
+            Tuvība un laba pieredze palīdz veidot apmierinātību un noturēšanu.
+            Atkārtots pirkums tomēr jāvērtē kopā ar motīvu: klientu var noturēt
+            arī līgums vai lielas maiņas izmaksas, bet lojalitāte uzsver
+            brīvprātīgu priekšroku.
+          </p>
+          <p>
+            Attiecību mārketings balstās dialogā, atgriezeniskajā saitē,
+            darbinieku pilnvarās risināt problēmas un komandas darbā. Klienta
+            vajadzības salāgo ar uzņēmuma ilgtermiņa ekonomisko vērtību.
+          </p>
+          <p class="key">
+            Darījums rada pieredzi; pieredze ietekmē attiecības; attiecības
+            ietekmē nākamo pirkumu.
+          </p>
+        </div>
+        <p class="source">
+          Avots: 1.1.1 · 28.–31. lpp.; 1.1.2 · 5., 7. lpp.; 1.3 · 35.–38. lpp.
+        </p>
+      </section>
+      <section
+        class="chapter"
+        id="realizacijas-vaditajs"
+        data-keywords="PRV vadītājs pienākumi prognozēšana budžets teritorijas atlase apmācība motivācija kontrole rentabilitāte"
+      >
+        <h2 tabindex="-1">
+          <span class="num">28</span>
+          <span class="chapter-title">Realizācijas vadītāja atbildība</span>
+        </h2>
+        <div class="content">
+          <p>
+            Vadītāja uzdevums ir panākt, lai pārdošanas funkcija efektīvi
+            piedalītos uzņēmuma mērķu sasniegšanā. Atbildība ietver ne tikai
+            apgrozījumu, bet arī rentabilitāti, tirgus daļu, klientu
+            apmierinātību un attiecības.
+          </p>
+          <ul>
+            <li>Nosaka pārdošanas mērķus un uzdevumus.</li>
+            <li>Prognozē realizāciju un plāno budžetu.</li>
+            <li>
+              Veido pārdošanas organizāciju, nosaka personāla apjomu un
+              teritorijas.
+            </li>
+            <li>Atlasa, piesaista un apmāca pārdošanas personālu.</li>
+            <li>Motivē darbiniekus.</li>
+            <li>Novērtē rezultātus, kontrolē izpildi un koriģē darbību.</li>
+            <li>
+              Saskaņo pārdošanu ar mārketingu, servisu, loģistiku un pārējām
+              funkcijām.
+            </li>
+          </ul>
+          <p>
+            Mārketings veido pozicionējumu, segmentus, saturu un pieprasījuma
+            atbalstu; pārdošana īsteno darbu ar klientu un dod atgriezenisko
+            saiti. Atšķirīgi mērķi un datu nošķiršana rada konfliktus.
+          </p>
+          <p class="key">
+            Vadītājs organizē rentablu klienta vērtības radīšanas sistēmu, ne
+            tikai pieprasa lielāku pārdošanas skaitli.
+          </p>
+        </div>
+        <p class="source">Avots: 1.1.1 · 2.–3. lpp.; 1.3 · 18., 40.–45. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="crm"
+        data-keywords="CRM Customer Relationship Management ERP MI mākslīgais intelekts automatizācija potenciālais esošais lojālais klients"
+      >
+        <h2 tabindex="-1">
+          <span class="num">29</span>
+          <span class="chapter-title"
+            >CRM — vienota klientu attiecību pieeja</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            <strong>CRM (Customer Relationship Management)</strong> ir uz
+            klientu orientēta biznesa pieeja, kas saskaņo mārketinga, pārdošanas
+            un servisa darbu. Programmatūra to atbalsta, bet CRM nav tikai
+            kontaktu saraksts.
+          </p>
+          <p>
+            Pamats:
+            <strong
+              >vienota datu bāze, vienota pieeja klientam, kopīgi apkalpošanas
+              standarti, procesu analīze un attīstības plāns</strong
+            >.
+          </p>
+          <dl>
+            <dt>Mārketingam</dt>
+            <dd>
+              Segmentēšana, iespēju radīšana, kampaņu plānošana un rezultātu
+              analīze; personalizēta saziņa.
+            </dd>
+            <dt>Pārdošanai</dt>
+            <dd>
+              Potenciālā klienta virzība līdz līgumam, piedāvājumi, darījumu
+              statuss, atgādinājumi, prognozes un komandas darbs.
+            </dd>
+            <dt>Servisam</dt>
+            <dd>
+              Zvanu un pieprasījumu uzskaite, uzdevumi, resursi, prioritātes,
+              risinājumu un zināšanu koplietošana.
+            </dd>
+          </dl>
+          <p>
+            Integrācijā CRM savieno ar e-komerciju, saziņas kanāliem, analītiku
+            un <strong>ERP</strong> — uzņēmuma resursu plānošanas sistēmu. MI
+            var palīdzēt prioritizēt klientus, prognozēt un personalizēt; pamatā
+            vajadzīga datu kvalitāte un atbildīga izmantošana.
+          </p>
+          <p class="key">
+            Potenciāls klients → esošs klients → lojāls klients. Vienota
+            informācija palīdz izvairīties no situācijas, kad katra nodaļa
+            klientu „pazīst” citādi.
+          </p>
+        </div>
+        <p class="source">Avots: 1.1.2 · 6.–8. lpp.; 1.3 · 46.–50. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="datubazes-marketings"
+        data-keywords="datu bāzes mārketings datubāze tiešais pasts telemārketings ģeodemogrāfija kampaņas kontakti"
+      >
+        <h2 tabindex="-1">
+          <span class="num">30</span>
+          <span class="chapter-title">Datu bāzes mārketings</span>
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Datu bāzes mārketings</strong> izmanto strukturētu klientu,
+            saziņas un darījumu informāciju, lai izvēlētos piemērotus adresātus
+            un pielāgotu nākamo kontaktu.
+          </p>
+          <h3>Piecas informācijas grupas</h3>
+          <ol>
+            <li>
+              <strong>Klienti un potenciālie klienti:</strong> kontakti,
+              profils, vajadzības, B2B lēmuma dalībnieki un kritēriji.
+            </li>
+            <li>
+              <strong>Darījumi:</strong> ko, kad, cik bieži un par kādu vērtību
+              pērk.
+            </li>
+            <li>
+              <strong>Mārketinga komunikācija:</strong> kampaņas, saņemtie
+              vēstījumi, reakcijas un rezultāti.
+            </li>
+            <li>
+              <strong>Produkti:</strong> kuri piedāvājumi virzīti un kā uz tiem
+              reaģēts.
+            </li>
+            <li>
+              <strong>Ģeodemogrāfija:</strong> atrašanās vieta un ar profilu
+              saistītās pazīmes.
+            </li>
+          </ol>
+          <p>
+            Izmanto tiešajā pastā un telemārketingā, lojalitātes programmās,
+            kampaņu un mērķa grupu izvēlē, izplatītāju vadībā un rezultātu
+            novērtēšanā. Informāciju no iepriekšējā kontakta izmanto nākamajā,
+            nevis ikreiz sāk no nulles.
+          </p>
+          <p class="key">
+            Vērtība nav datu daudzumā vien: svarīgi ir aktuāli dati, analīze un
+            piemērota rīcība uz to pamata.
+          </p>
+        </div>
+        <p class="source">Avots: 1.3 · 48., 51.–54. lpp.</p>
+      </section>
+      <div class="group-title">Mārketinga un realizācijas instrumenti</div>
+      <section
+        class="chapter"
+        id="politika-instrumenti"
+        data-keywords="politika stratēģija taktika kampaņa pasākumi instrumentārijs instruments alternatīvu izvēles kvalitātes daudzuma laika vietas saskaņas aspekts"
+      >
+        <h2 tabindex="-1">
+          <span class="num">31</span>
+          <span class="chapter-title"
+            >Politika, stratēģija un instrumentārijs</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Politika</strong> nosaka darbības principus;
+            <strong>stratēģija</strong> — ilgtermiņa virzienu un izvēles;
+            <strong>taktika</strong> — konkrētu īstermiņa rīcību stratēģijas
+            ietvaros. Kampaņas un pasākumi praktiski izmanto instrumentus.
+          </p>
+          <p>
+            <strong>Mārketinga un realizācijas instrumentārijs</strong> ir rīku
+            un metožu kopums pieprasījuma veidošanai, preču virzībai un
+            pārdošanai. Instruments ir mērķtiecīgi izraudzīts darbības
+            līdzeklis; visu izmantoto instrumentu sistēma veido instrumentāriju.
+          </p>
+          <p>
+            Secība:
+            <strong
+              >uzņēmuma politika → stratēģija → taktika → kampaņa/pasākumi →
+              instrumenti → konkrētas darbības</strong
+            >. Virziens uz leju konkretizē mērķus, bet rezultātu kontrole dod
+            informāciju korekcijām.
+          </p>
+          <p>
+            Izvēloties instrumentus, jāatbild:
+            <strong
+              >kādi ir pieejami, kurus izvēlēties, kā lietot, cik daudz, kad un
+              cik bieži, kur un kā savstarpēji saskaņot?</strong
+            >
+            Mērķis ir sakārtot darbības, mazināt sarežģītību un efektīvi
+            izmantot cilvēkus, finanses un materiālus.
+          </p>
+          <p class="key">
+            Instruments nav pašmērķis. Tā rezultātu vērtē pēc ieguldījuma
+            pasākuma un uzņēmuma mērķī.
+          </p>
+        </div>
+        <p class="source">Avots: 2.1 · 6., 8.–13., 30.–31. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="pieprasijuma-stavokli"
+        data-keywords="pieprasījuma stāvokļi pamudinošs atdzīvinošs stabilizācijas attīstības saglabājošs samazinošs uzbrūkošs"
+      >
+        <h2 tabindex="-1">
+          <span class="num">32</span>
+          <span class="chapter-title"
+            >Pieprasījuma stāvoklis un atbilstošā rīcība</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            Mārketinga uzdevums ne vienmēr ir palielināt pieprasījumu. Tas ir
+            atkarīgs no tirgus situācijas.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Stāvoklis</th>
+                <th scope="col">Uzdevums un materiāla nosaukums</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Nav pieprasījuma</td>
+                <td>
+                  Rosināt interesi — <strong>pamudinošs mārketings</strong>.
+                </td>
+              </tr>
+              <tr>
+                <td>Sastindzis</td>
+                <td>Atdzīvināt — <strong>atdzīvinošs mārketings</strong>.</td>
+              </tr>
+              <tr>
+                <td>Svārstīgs</td>
+                <td>
+                  Stabilizēt — <strong>stabilizācijas mārketings</strong>.
+                </td>
+              </tr>
+              <tr>
+                <td>Slēpts</td>
+                <td>
+                  Attīstīt risinājumu pastāvošai, nepietiekami apmierinātai
+                  vajadzībai — <strong>attīstības mārketings</strong>.
+                </td>
+              </tr>
+              <tr>
+                <td>Optimāls</td>
+                <td>Saglabāt — <strong>saglabājošs mārketings</strong>.</td>
+              </tr>
+              <tr>
+                <td>Palielināts</td>
+                <td>
+                  Samazināt vai regulēt — <strong>samazinoša pieeja</strong>.
+                </td>
+              </tr>
+              <tr>
+                <td>Zaudējumus nesošs</td>
+                <td>
+                  Novērst nevēlamo pieprasījumu — slaidā
+                  <strong>„uzbrūkošs mārketings”</strong>.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="key">
+            Vispirms nosaki problēmu tirgū, tad izvēlies stratēģiju un
+            instrumentus.
+          </p>
+        </div>
+        <p class="source">Avots: 2.1 · 6.–7. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="mikss"
+        data-keywords="4P mikss mix product price place promotion produkta cenas sadales komunikācijas politika"
+      >
+        <h2 tabindex="-1">
+          <span class="num">33</span>
+          <span class="chapter-title">4P un politiku savstarpējā saistība</span>
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Mārketinga mikss</strong> ir kontrolējamo instrumentu
+            kombinācija izvēlētā mērķa tirgus apkalpošanai.
+          </p>
+          <dl class="compact">
+            <dt>Product — produkts</dt>
+            <dd>
+              Īpašības, kvalitāte, dizains, iepakojums, sortiments un vērtības
+              piedāvājums.
+            </dd>
+            <dt>Price — cena</dt>
+            <dd>
+              Cenas līmenis, atlaides, uzcenojumi, kredīts un darījuma
+              nosacījumi.
+            </dd>
+            <dt>Place — vieta / sadale</dt>
+            <dd>Kanāli, starpnieki, pieejamība, krājumi un piegāde.</dd>
+            <dt>Promotion — virzīšana / komunikācija</dt>
+            <dd>
+              Reklāma, sabiedriskās attiecības, stimulēšana, personīgā pārdošana
+              un citi saziņas instrumenti.
+            </dd>
+          </dl>
+          <p>
+            Kursā līdzās 4P izmantotas četras plašas politiku grupas:
+            <strong
+              >piedāvājuma jeb rezultātu sasniegšanas programmas politika,
+              darījuma nosacījumu politika, noieta/realizācijas politika un
+              komunikatīvā politika</strong
+            >. Tirdzniecības uzņēmumiem īpaši nozīmīga ir arī infrastruktūras un
+            atrašanās vietas politika.
+          </p>
+          <p>
+            Dažādi autori instrumentus grupē atšķirīgi. Jaunākajos slaidos
+            atsevišķi izcelti arī daudzkanālu procesi, serviss, attiecības,
+            loģistika, analītika un MI. Jāizprot funkcija, nevis mehāniski
+            jāsaliek visi autoru saraksti vienā.
+          </p>
+          <p class="key">
+            4P jādarbojas saskaņoti vienai mērķa grupai. Personīgā pārdošana ir
+            daļa no kopējā miksa.
+          </p>
+        </div>
+        <p class="source">Avots: 1.3 · 15.–16. lpp.; 2.1 · 13.–14. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="piedavajuma-politika"
+        data-keywords="RSPIP rezultātu sasniegšanas programmas īstenošanas politika sortiments platums plašums dziļums produkta politika servisa politika"
+      >
+        <h2 tabindex="-1">
+          <span class="num">34</span>
+          <span class="chapter-title"
+            >Piedāvājuma, sortimenta un servisa politika</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            Materiāla termins
+            <strong
+              >RSPIP — rezultātu sasniegšanas programmas īstenošanas
+              politika</strong
+            >
+            sasaista stratēģisko mērķi ar konkrētu piedāvājumu un realizējamiem
+            pasākumiem. Tirdzniecībā uzsvērta sortimenta politika.
+          </p>
+          <h3>Četras apakšgrupas</h3>
+          <ol>
+            <li>
+              <strong>Inovāciju politika:</strong> jauni un uzlaboti produkti,
+              procesi, sadarbības formas un sociāli risinājumi.
+            </li>
+            <li>
+              <strong>Klasiskā produkta politika:</strong> specifikācija,
+              kvalitāte, recepte, dizains, nosaukums, zīmols, marķējums un
+              iepakojums.
+            </li>
+            <li>
+              <strong>Programmas / sortimenta veidošana:</strong> ko piedāvā, kā
+              paplašina vai sašaurina klāstu. <strong>Plašums</strong> ir
+              produktu grupu daudzveidība, <strong>dziļums</strong> — variantu
+              skaits grupā.
+            </li>
+            <li>
+              <strong>Servisa un pakalpojumu politika:</strong> atbalsts pirms
+              pirkuma, iegādes laikā un pēc tā — konsultācija, apmācība,
+              piegāde, garantija, apkope un problēmu risināšana.
+            </li>
+          </ol>
+          <p>
+            Piedāvājumu veido kopīgi mārketings, realizācija un
+            izpētes/attīstības funkcijas. Pasākumiem vajadzīga atbildība,
+            resursi, rezultāta mērs un salīdzināšana ar plānu.
+          </p>
+          <p class="key">
+            Uzņēmums izlemj ne tikai „kādu preci tirgot?”, bet „kādu produktu,
+            pakalpojumu un servisa programmu klients saņems?”.
+          </p>
+        </div>
+        <p class="source">Avots: 2.1 · 14.–16., 24. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="darijuma-politika"
+        data-keywords="darījuma nosacījumu politika pamatcena tarifs atlaide uzcenojums apmaksa kredīts garantija bonuss"
+      >
+        <h2 tabindex="-1">
+          <span class="num">35</span>
+          <span class="chapter-title">Cena un darījuma nosacījumi</span>
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Darījuma nosacījumu politika</strong> nosaka, par kādu
+            atlīdzību un ar kādiem papildu nosacījumiem klients iegūst
+            piedāvājumu.
+          </p>
+          <ol>
+            <li>
+              <strong>Pamatcena un cenas līmenis:</strong> tarifs,
+              premium/vidējais/ekonomiskais pozicionējums; iespējama
+              diferenciācija pēc grupas, reģiona vai laika.
+            </li>
+            <li>
+              <strong>Uzcenojumi un atlaides:</strong> par apjomu, sezonu, ātru
+              apmaksu, lojalitāti vai īpašām izmaksām.
+            </li>
+            <li>
+              <strong>Nosacījumi ar izmaksu nozīmi:</strong> apmaksas termiņš,
+              kredīts, piegāde, apdrošināšana, garantijas, atgriešana un
+              tehniskais atbalsts.
+            </li>
+            <li>
+              <strong>Citi nosacījumi:</strong> paraugi un izmēģinājums,
+              apmācība, informācijas apmaiņa, kopīga attīstība, partnerības
+              statuss un sadarbības priekšrocības.
+            </li>
+          </ol>
+          <p>
+            Jāvērtē viss darījums: zemāka cena ar dārgu piegādi vai neizdevīgu
+            apmaksu var būt mazāk pievilcīga nekā augstāka cena ar atbilstošu
+            atbalstu.
+          </p>
+          <p class="key">
+            Cena ir tikai viena darījuma daļa; nosacījumi maina klienta kopējo
+            ieguvumu un uzņēmuma izmaksas.
+          </p>
+        </div>
+        <p class="source">Avots: 2.1 · 17., 25. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="noieta-politika"
+        data-keywords="realizācijas sistēma pārdošanas politika noieta kanāli partneri loģistika tiešā netiešā intensīvā ekskluzīvā franšīze atgriešana"
+      >
+        <h2 tabindex="-1">
+          <span class="num">36</span>
+          <span class="chapter-title"
+            >Četras noieta / realizācijas politikas daļas</span
+          >
+        </h2>
+        <div class="content">
+          <ol>
+            <li>
+              <strong>Realizācijas sistēma:</strong> organizācija, pārdošanas
+              formas, vadīšana, atbildības un informācijas plūsma.
+            </li>
+            <li>
+              <strong>Pārdošanas politika:</strong> klientu piesaiste,
+              apkalpošana un noturēšana; personāls, mērķi, apmācība un
+              motivācija.
+            </li>
+            <li>
+              <strong>Noieta kanāli un partneri:</strong> ceļš līdz klientam,
+              partneru izvēle, līgumi, atbalsts un savstarpējo interešu
+              saskaņošana.
+            </li>
+            <li>
+              <strong>Noieta loģistika:</strong> krājumi, noliktavas,
+              transports, pasūtījumu apstrāde, piegādes un atgriešanas plūsma.
+            </li>
+          </ol>
+          <p>
+            <strong>Tiešā kanālā</strong> ražotājs pārdod gala klientam;
+            <strong>netiešā</strong> iesaistās neatkarīgi starpnieki. Jāizvēlas
+            arī pārklājums: plaša, intensīva pieejamība vai ierobežota,
+            atlasīta/ekskluzīva izplatīšana.
+          </p>
+          <p>
+            Personisks vai digitāls kontakts ir cita pazīme nekā starpnieku
+            esamība. Paša ražotāja interneta veikals var būt tiešs kanāls;
+            pārdošana caur neatkarīgu tirgotāju — netiešs.
+          </p>
+          <p class="note">
+            Slaidā „tiešā/netiešā pārdošana” vietām raksturo arī personisku vai
+            attālinātu apkalpošanu. Analīzē vienmēr pasaki, vai runa ir par
+            kontaktu vai kanāla dalībniekiem.
+          </p>
+          <p>
+            Kanālu atbalsta pārstāvji, aģenti, tirgotāji, līgumattiecības un
+            franšīze. Ātrāka piegāde var prasīt lielākus krājumus un izmaksas;
+            jālīdzsvaro servisa līmenis ar ekonomisko rezultātu.
+          </p>
+        </div>
+        <p class="source">Avots: 1.3 · 16. lpp.; 2.1 · 18.–19., 26. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="ecr"
+        data-keywords="ECR Efficient Consumer Response CAS Computer Aided Selling elektroniskā datu apmaiņa kategoriju pārvaldība krājumi pieejamība plauktā aprites ekonomika"
+      >
+        <h2 tabindex="-1">
+          <span class="num">37</span>
+          <span class="chapter-title">Datu integrācija un ECR</span>
+        </h2>
+        <div class="content">
+          <p>
+            <strong>ECR (Efficient Consumer Response)</strong> ir ražotāju un
+            tirgotāju sadarbība, lai efektīvāk reaģētu uz faktiskajām patērētāju
+            vajadzībām. Pārdošanas dati palīdz saskaņot pieprasījumu, krājumus
+            un piegādes.
+          </p>
+          <p>
+            Pamata loģika:
+            <strong
+              >faktisks pirkums → datu apmaiņa → krājumu papildināšanas
+              vajadzība → pasūtījums un piegāde</strong
+            >. Automatizācija var samazināt kļūdas un liekus krājumus,
+            vienlaikus uzlabojot pieejamību.
+          </p>
+          <p>
+            Materiālā izceltās jomas:
+            <strong
+              >pieprasījuma pārvaldība, piedāvājuma pārvaldība, veicinātāji un
+              integrētāji</strong
+            >. Praktiskie virzieni ir kategoriju pārvaldība, preces pieejamība
+            plauktā, piegādes ķēde, mazumtirdzniecības zudumi, ilgtspējība un
+            aprites ekonomika.
+          </p>
+          <p>
+            Instrumenti: kodu skenēšana, elektroniska datu apmaiņa, pasūtījumu
+            un rēķinu sistēmas, <strong>CAS</strong> jeb datorizēts pārdošanas
+            atbalsts un CRM.
+          </p>
+          <p class="key">
+            Realizācijas efektivitāte rodas arī sadarbībā starp uzņēmumiem, ne
+            tikai no atsevišķa pārdevēja darba.
+          </p>
+        </div>
+        <p class="source">Avots: 2.1 · 26.–28. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="komunikaciju-politika"
+        data-keywords="komunikatīvā politika komunikācija zīmols identitāte pozicionējums reputācija IMK MIL SA NS reklāma publicitāte tiešais mārketings ROI"
+      >
+        <h2 tabindex="-1">
+          <span class="num">38</span>
+          <span class="chapter-title"
+            >Komunikācija, zīmols un instrumentu grupas</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Komunikāciju politika</strong> sistemātiski veido
+            informācijas plūsmu starp uzņēmumu un auditoriju: informē, veido
+            tēlu, pamato izvēli un uztur attiecības. Pirms kanāla izvēles jāzina
+            <strong>kam, ko, kāpēc un ar kādu vēlamo efektu sakām</strong>.
+          </p>
+          <dl>
+            <dt>Tēls un korporatīvā komunikācija</dt>
+            <dd>
+              Identitāte, komunikācijas stils, kultūra, sabiedriskās attiecības,
+              reputācija, sponsorēšana un notikumi. Zīmols ietver nozīmi,
+              solījumu un uztveri, ne tikai nosaukumu un logo.
+            </dd>
+            <dt>Plašsaziņas un publicitātes instrumenti</dt>
+            <dd>
+              Prese, radio, TV, āra un digitālā reklāma, publikācijas,
+              intervijas un profesionālie mediji.
+            </dd>
+            <dt>Tiešā, adresētā komunikācija</dt>
+            <dd>
+              E-pasts, tiešie ziņojumi, tālrunis, čats un atbildi rosinoši
+              piedāvājumi; klientu klubi un lojalitātes saziņa.
+            </dd>
+            <dt>Pārdošanas stimulēšana un personiskā saskarsme</dt>
+            <dd>
+              Paraugi, degustācijas, demonstrācijas, izmēģinājumi, akcijas,
+              katalogi, izstādes, gadatirgi, klientu pasākumi un apmācības.
+            </dd>
+          </dl>
+          <p>
+            <strong>Integrēta mārketinga komunikācija (IMK)</strong> saskaņo
+            vēstījumus un kanālus. Pretēji solījumi dažādās vietās grauj
+            uzticību; pat spilgta reklāma neizlabo neatbilstošu pieredzi.
+          </p>
+          <p>
+            Materiāls uzsver rezultātu mērīšanu un finanšu domāšanu: budžetu
+            pamato ar sagaidāmo un faktisko ietekmi, ne tikai aktivitāšu skaitu.
+          </p>
+          <p class="note">
+            Slaidu „tiešās/netiešās reklāmas” saraksti daļēji pārklājas. Šeit
+            atšķirta plaša sasniegšana, adresēta saziņa, tēla veidošana un
+            darījuma stimulēšana. MIL — masu informācijas līdzekļi; SA —
+            sabiedriskās attiecības; NS — noieta stimulēšana.
+          </p>
+        </div>
+        <p class="source">
+          Avots: 1.3 · 15., 25. lpp.; 2.1 · 20.–23., 29. lpp.
+        </p>
+      </section>
+      <section
+        class="chapter"
+        id="instrumentu-saskanosana"
+        data-keywords="sinerģija pozitīva negatīva 2+2=5 pārnešanas efekts interkorelācija kombinācija optimizācija budžets"
+      >
+        <h2 tabindex="-1">
+          <span class="num">39</span>
+          <span class="chapter-title"
+            >Instrumentu kombinēšana un sinerģija</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            Instrumentus nevar optimizēt pilnīgi atrauti: viena izvēle maina
+            citu rezultātus, noslodzi un izmaksas.
+          </p>
+          <dl>
+            <dt>Savstarpēja ietekme</dt>
+            <dd>
+              Piemēram, cenas līmenis ietekmē to, kādam jābūt vēstījumam par
+              produkta vērtību.
+            </dd>
+            <dt>Pozitīva sinerģija</dt>
+            <dd>
+              Saskaņota kvalitāte, reklāma un serviss pastiprina kopējo
+              rezultātu. Materiāla simboliskais pieraksts:
+              <strong>2 + 2 = 5</strong>.
+            </dd>
+            <dt>Negatīva sinerģija</dt>
+            <dd>
+              Instrumenti darbojas pretrunīgi, piemēram, premium tēla solījums
+              kopā ar pastāvīgi agresīvām atlaidēm. Simboliski:
+              <strong>2 + 2 = 3</strong>.
+            </dd>
+            <dt>Pārnešanas efekts</dt>
+            <dd>
+              Viena instrumenta izmaiņa izraisa reakciju citā jomā: cenu
+              samazinājums palielina pasūtījumus un loģistikas slodzi.
+            </dd>
+          </dl>
+          <p>
+            Kombināciju ierobežo budžets, cilvēki, nodaļu intereses un fiksētas
+            saistības, piemēram, līgums vai iepriekš noteikta cena. Instrumentu
+            sastāvs laika gaitā jāpielāgo.
+          </p>
+          <p class="key">
+            Pārbaude pirms kampaņas: vai produkts, cena, vēstījums, piegāde un
+            serviss viens otru atbalsta un vai uzņēmums spēs izpildīt solīto?
+          </p>
+        </div>
+        <p class="source">Avots: 2.1 · 30.–34. lpp.</p>
+      </section>
+      <div class="group-title">Atšķirības nozarēs un digitālajā vidē</div>
+      <section
+        class="chapter"
+        id="plasa-paterina-tirgus"
+        data-keywords="FMCG plaša patēriņa nozare ražotājs vairumtirgotājs mazumtirgotājs pašu zīmoli kanālu konflikts"
+      >
+        <h2 tabindex="-1">
+          <span class="num">40</span>
+          <span class="chapter-title">Plaša patēriņa preču tirgus</span>
+        </h2>
+        <div class="content">
+          <p>
+            Klasiskā sistēmā starp ražotāju un patērētāju ir vairumtirgotāji un
+            mazumtirgotāji. Ražotājs strādā gan ar izplatītājiem un lielajiem
+            klientiem, gan ar gala patērētāja pieprasījumu.
+          </p>
+          <ul>
+            <li>Plašs pārklājums un pieejamība palīdz nodrošināt apjomu.</li>
+            <li>
+              Zīmols, reklāma un pārdošanas stimulēšana veido priekšroku un
+              rosina izvēli.
+            </li>
+            <li>
+              Ikdienas precēm svarīga ierastā izvēle, pirkuma vieta un impulsi;
+              īpašiem produktiem — arī dzīvesveids, nozīme un sajūtas.
+            </li>
+            <li>
+              Tirgotāju koncentrācija un pašu zīmoli pastiprina to ietekmi
+              attiecībās ar ražotājiem.
+            </li>
+            <li>
+              Paša ražotāja veikali un interneta tirdzniecība veido tiešu
+              kontaktu, bet var radīt konfliktu ar esošajiem partneriem.
+            </li>
+          </ul>
+          <p>
+            Ja uzņēmums nesaprot mērķa klientu, pazīmes ir vāja reakcija,
+            konkurentu priekšrocības, sūdzības un novecojusi izpēte. Risinājums
+            ir atjaunot klientu izpēti, izmantot analītiku, partneru pieredzi un
+            CRM datus.
+          </p>
+          <p class="key">
+            Ar reklāmu vien nepietiek: pieprasītajai precei jābūt sasniedzamai
+            īstajā vietā un laikā.
+          </p>
+        </div>
+        <p class="source">Avots: 2.1 · 35.–39. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="push-pull"
+        data-keywords="Push Pull virzīšanas pieprasījuma piesaistes stratēģija starpnieki gala klients"
+      >
+        <h2 tabindex="-1">
+          <span class="num">41</span>
+          <span class="chapter-title">Push un Pull stratēģijas</span>
+        </h2>
+        <div class="content">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Push — virzīšana</th>
+                <th scope="col">Pull — pieprasījuma piesaiste</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ietekmē galvenokārt <strong>starpnieku</strong>.</td>
+                <td>Ietekmē galvenokārt <strong>gala klientu</strong>.</td>
+              </tr>
+              <tr>
+                <td>
+                  Panāk, lai tirgotājs iekļauj preci sortimentā un aktīvi
+                  piedāvā.
+                </td>
+                <td>
+                  Panāk, lai klients pats meklē un pieprasa preci vai zīmolu.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Tirdzniecības atlaides, pārdevēju apmācības, kopīgas akcijas
+                  un partneru atbalsts.
+                </td>
+                <td>
+                  Reklāma, saturs, atsauksmes, zīmola komunikācija un
+                  meklētājprogrammu mārketings.
+                </td>
+              </tr>
+              <tr>
+                <td>Rezultāts: preces pieejamība un virzība kanālā.</td>
+                <td>Rezultāts: klienta radīts pieprasījums.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="key">
+            Push — palīdz kanālam virzīt preci līdz klientam. Pull — rada
+            klienta vēlmi preci meklēt. Abas stratēģijas var kombinēt.
+          </p>
+          <p>
+            Internets dod gan iespēju atbalstīt starpniekus, gan tieši
+            sazināties ar gala klientu. Tādēļ stratēģiju nenosaka tikai
+            izmantotā tehnoloģija, bet ietekmes adresāts un mērķis.
+          </p>
+        </div>
+        <p class="source">Avots: 2.1 · 37.–38., 44., 47. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="razosanas-tirgus"
+        data-keywords="ražošanas līdzekļi atvasināts pieprasījums B2B tehniskā kompetence noma nišu tirgus"
+      >
+        <h2 tabindex="-1">
+          <span class="num">42</span>
+          <span class="chapter-title">Ražošanas līdzekļu tirgus īpatnības</span>
+        </h2>
+        <div class="content">
+          <p>
+            <strong>Atvasināts pieprasījums:</strong> vajadzība pēc ražošanas
+            līdzekļiem ir saistīta ar pieprasījumu pēc produktiem un
+            pakalpojumiem, kurus ar tiem rada. Ražošanas risinājumu var arī
+            nomāt, nevis obligāti iegādāties īpašumā.
+          </p>
+          <ul>
+            <li>
+              Izšķiroša ir pārdevēja tehniskā kompetence un produkta
+              piemērotība.
+            </li>
+            <li>
+              Svarīgas ciešas attiecības, konsultācijas, serviss un piegādes
+              drošība.
+            </li>
+            <li>
+              Pirkšanas centrs apvieno vairākas intereses; pārdošanas centram
+              jāspēj tās saskaņot.
+            </li>
+            <li>
+              Tirgus var būt fragmentēts specializētās nišās, bet konkurence un
+              klienti — starptautiski.
+            </li>
+            <li>
+              Cena bieži ir sarunu priekšmets; jālīdzsvaro tehniskie un
+              komerciālie kritēriji.
+            </li>
+            <li>
+              Procesi ir ilgāki un riski abām pusēm lielāki; nozīmīga ir tiešā
+              saziņa un nozares gadatirgi.
+            </li>
+          </ul>
+          <p class="note">
+            Lai gan šajā nozarē tehniskie un ekonomiskie kritēriji ir īpaši
+            svarīgi, tie neatceļ cilvēku uzticību, personiskos apsvērumus un
+            iekšējo politiku, kas aplūkota B2B pirkšanā.
+          </p>
+        </div>
+        <p class="source">Avots: 1.2 · 11., 43.–55. lpp.; 2.1 · 40.–41. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="pakalpojumi-iestades"
+        data-keywords="tirdzniecība pakalpojumu sfēra iestāžu tirgus bezpeļņas nekomerciālas organizācijas infrastruktūras atrašanās vietas politika"
+      >
+        <h2 tabindex="-1">
+          <span class="num">43</span>
+          <span class="chapter-title"
+            >Tirdzniecība, pakalpojumi un nekomerciālas organizācijas</span
+          >
+        </h2>
+        <div class="content">
+          <h3>Tirdzniecība un pakalpojumi</h3>
+          <p>
+            Tirgotāji veido savu tēlu un zīmolus, tādēļ tiem ir ietekme arī uz
+            ražotājiem. Pakalpojuma netaustāmība padara svarīgu uzticību un
+            skaidru vērtības solījumu. Klientam jāspēj saprast, ko viņš saņems
+            un kā vērtēt rezultātu.
+          </p>
+          <p>
+            <strong>Atrašanās vietas / infrastruktūras politika</strong> ir
+            patstāvīgs instruments stacionārai tirdzniecībai un pakalpojumiem:
+            pieejamība un piemērota vieta ietekmē klientu plūsmu un pieredzi.
+          </p>
+          <h3>Iestādes un nekomerciālās organizācijas</h3>
+          <p>
+            Mērķis nav tikai peļņa: darbība var būt vērsta uz sabiedrisko
+            labumu, pakalpojuma pieejamību vai biedru piesaisti. Joprojām
+            vajadzīga klientu un iesaistīto pušu izpratne, komunikācija,
+            apkalpošana un rezultāta novērtējums.
+          </p>
+          <p>
+            Īpaši svarīgas ir sabiedriskās attiecības, tēls, tiešā komunikācija
+            un atbildība par cilvēkiem, sabiedrību un vidi.
+          </p>
+          <p class="key">
+            Mārketinga principus izmanto arī tad, ja gala rezultātu nemēra
+            vienīgi peļņā.
+          </p>
+        </div>
+        <p class="source">Avots: 1.1.2 · 43.–47. lpp.; 2.1 · 42.–43. lpp.</p>
+      </section>
+      <section
+        class="chapter"
+        id="internets-daudzkanalu"
+        data-keywords="internets e-komercija multichannel omnichannel daudzkanālu viskanālu digitālā tirdzniecība dati pieejamība"
+      >
+        <h2 tabindex="-1">
+          <span class="num">44</span>
+          <span class="chapter-title"
+            >Internets un daudzkanālu realizācija</span
+          >
+        </h2>
+        <div class="content">
+          <p>
+            Internets maina ne tikai reklāmu, bet arī pasūtīšanu, salīdzināšanu,
+            piegādi un attiecības starp ražotāju, tirgotāju un klientu. Klients
+            kļūst informētāks un ar atsauksmēm ietekmē citus; uzņēmums iegūst
+            vairāk datu un personalizācijas iespēju.
+          </p>
+          <dl>
+            <dt>Multichannel — daudzkanālu pieeja</dt>
+            <dd>
+              Uzņēmums izmanto vairākus kanālus, piemēram, veikalu, vietni un
+              tālruni.
+            </dd>
+            <dt>Omnichannel — savstarpēji integrēta kanālu pieeja</dt>
+            <dd>
+              Kanālu dati un klienta pieredze ir saskaņoti, lai pāreja starp
+              tiem būtu vienota.
+            </dd>
+          </dl>
+          <p>
+            Efektīvai sistēmai vajadzīga saskaņota cena un informācija, preču
+            pieejamība, pasūtījumu statuss, serviss un atbildība starp kanāliem.
+            Atsevišķi labi kanāli vēl neveido vienotu pieredzi.
+          </p>
+          <p>
+            <strong>Uzticības pamati e-komercijā:</strong> saprotama informācija
+            par preci, pārdevēju, cenu un piegādi; caurspīdīgi maksājumi; droša
+            datu un maksājumu apstrāde; godīga komunikācija; skaidra
+            atgriešanas, kvalitātes, atbalsta un strīdu risināšanas kārtība.
+          </p>
+          <p class="note">
+            Šis ir materiāla vispārīgo e-komercijas principu apkopojums, nevis
+            aktuālo tiesību normu vai konkrētu atteikuma/garantijas termiņu
+            izklāsts.
+          </p>
+          <p class="key">
+            Klients redz vienu uzņēmumu, pat ja pirkuma ceļā izmanto vairākus
+            kanālus.
+          </p>
+        </div>
+        <p class="source">
+          Avots: 1.1.1 · 14.–15., 31. lpp.; 1.1.2 · 6.–9., 27.–29. lpp.; 2.1 ·
+          19., 44.–47. lpp.
+        </p>
+      </section>
+      <div class="group-title">Atkārtošanai</div>
+      <section
+        class="chapter"
+        id="atkartojums"
+        data-keywords="atkārtojums kontroldarbs jēdzieni definīcijas salīdzinājums kopsavilkums"
+      >
+        <h2 tabindex="-1">
+          <span class="num">45</span>
+          <span class="chapter-title"
+            >Īsais atkārtojums un jēdzienu atšķirības</span
+          >
+        </h2>
+        <div class="content">
+          <dl class="compact">
+            <dt>Mārketings ↔ pārdošana</dt>
+            <dd>
+              Vadīšanas un tirgus izpratnes kopums ↔ konkrētais darbs darījuma
+              panākšanai.
+            </dd>
+            <dt>Vajadzība ↔ pieprasījums</dt>
+            <dd>
+              Izjustais trūkums ↔ ar iespējām un gatavību pamatota izvēle tirgū.
+            </dd>
+            <dt>Prece ↔ pakalpojums ↔ serviss</dt>
+            <dd>
+              Materiāls objekts ↔ darbības radīts labums ↔ piedāvājumu
+              atbalstoša apkalpošana.
+            </dd>
+            <dt>Produkta līmeņi ↔ preču kategorijas</dt>
+            <dd>
+              Viena piedāvājuma vērtības slāņi ↔ preču grupēšana pēc noteiktām
+              pazīmēm.
+            </dd>
+            <dt>Selling center ↔ buying center</dt>
+            <dd>Pārdevēja komanda ↔ klienta pirkšanas lēmuma dalībnieki.</dd>
+            <dt>Segments ↔ mērķa grupa</dt>
+            <dd>Līdzīgu pircēju grupa ↔ apkalpošanai izvēlētā grupa.</dd>
+            <dt>Apmierinātība ↔ lojalitāte</dt>
+            <dd>Pieredzes vērtējums ↔ brīvprātīga priekšroka un piesaiste.</dd>
+            <dt>CRM ↔ datu bāze</dt>
+            <dd>
+              Attiecību un procesu vadīšanas pieeja ↔ tās informācijas pamats.
+            </dd>
+            <dt>Politika ↔ stratēģija ↔ taktika</dt>
+            <dd>Principi ↔ ilgtermiņa izvēles ↔ konkrēta rīcība.</dd>
+            <dt>Push ↔ Pull</dt>
+            <dd>
+              Ietekme uz kanāla starpnieku ↔ pieprasījuma radīšana gala klientā.
+            </dd>
+          </dl>
+          <h3>Ko prast izskaidrot bez priekšā teikšanas?</h3>
+          <ol>
+            <li>
+              Kā klienta vajadzība pārtop piedāvājumā, darījumā un attiecībās?
+            </li>
+            <li>
+              Kādas ir sešas modernās pārdošanas iezīmes, pieci produkta līmeņi
+              un inovāciju tipi?
+            </li>
+            <li>Kas piedalās lēmumā un kā atšķiras B2C un B2B?</li>
+            <li>
+              Kā atšķiras patērētāja pieci posmi, organizācijas pirkšanas fāzes
+              un trīs pirkšanas klases?
+            </li>
+            <li>
+              Kā motīvi, selektīvā uztvere, attieksme un riski ietekmē izvēli?
+            </li>
+            <li>Kā atlasīt segmentu un pielāgot mārketingu?</li>
+            <li>Ko nozīmē triāde, CRM un uzņēmuma funkciju integrācija?</li>
+            <li>
+              Kā saistās 4P, piedāvājuma, darījuma, realizācijas un
+              komunikācijas politika?
+            </li>
+            <li>Kā rodas sinerģija, pārnešanas efekts un kanālu konflikti?</li>
+            <li>
+              Kā atšķiras darbība patēriņa, ražošanas, pakalpojumu, iestāžu un
+              interneta tirgos?
+            </li>
+          </ol>
+          <p class="key">
+            Vienojošā doma: izprast klientu → izvēlēties mērķa grupu → radīt
+            vērtīgu piedāvājumu → saskaņot instrumentus un procesus → pārdot un
+            apkalpot → mācīties no rezultātiem.
+          </p>
+        </div>
+        <p class="source">Avots: Visu piecu materiālu apkopojums</p>
+      </section>
+      <a class="bottom-link" href="#sakums">Uz sākumu</a>
+    </main>
+    <script>
+      (() => {
+        "use strict";
+        const $ = (id) => document.getElementById(id),
+          q = $("search"),
+          results = $("search-panel"),
+          list = $("results"),
+          status = $("result-status"),
+          toc = $("toc-panel"),
+          toggle = $("toc-toggle"),
+          clear = $("clear");
+        const fold = (s) =>
+          s
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLocaleLowerCase("lv");
+        const chapters = [...document.querySelectorAll(".chapter")].map(
+          (el) => ({
+            el,
+            id: el.id,
+            title: el.querySelector("h2").textContent.trim(),
+            text: el
+              .querySelector(".content")
+              .textContent.replace(/\s+/g, " ")
+              .trim(),
+            keys: el.dataset.keywords || "",
+          }),
+        );
+        const index = chapters.map((c) => ({
+          ...c,
+          search: fold(c.title + " " + c.keys + " " + c.text),
+          heading: fold(c.title + " " + c.keys),
+        }));
+        function closePanels() {
+          results.hidden = true;
+          toc.hidden = true;
+          toggle.setAttribute("aria-expanded", "false");
+          q.setAttribute("aria-expanded", "false");
+        }
+        function jump(id) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          closePanels();
+          q.blur();
+          try {
+            history.replaceState(history.state, "", "#" + id);
+          } catch (e) {
+            location.hash = id;
+          }
+          el.scrollIntoView({ block: "start" });
+          el.classList.remove("visited-target");
+          void el.offsetWidth;
+          el.classList.add("visited-target");
+          const heading = el.querySelector("h2");
+          heading.focus({ preventScroll: true });
+        }
+        function render() {
+          const input = q.value.trim();
+          clear.hidden = !input;
+          if (!input) {
+            results.hidden = true;
+            q.setAttribute("aria-expanded", "false");
+            return;
+          }
+          toc.hidden = true;
+          toggle.setAttribute("aria-expanded", "false");
+          const words = fold(input).split(/\s+/).filter(Boolean),
+            matches = index
+              .filter((c) => words.every((w) => c.search.includes(w)))
+              .sort(
+                (a, b) =>
+                  words.filter((w) => b.heading.includes(w)).length -
+                  words.filter((w) => a.heading.includes(w)).length,
+              );
+          list.replaceChildren();
+          status.textContent = matches.length
+            ? `Atrastas nodaļas: ${matches.length}. Pieskaries rezultātam; Enter atver pirmo.`
+            : "Nekas nav atrasts. Pamēģini īsāku vārdu, piemēram, „matric”, „risk” vai „izmaks”.";
+          for (const c of matches) {
+            const a = document.createElement("a");
+            a.href = "#" + c.id;
+            a.className = "result";
+            const h = document.createElement("strong");
+            h.textContent = c.title;
+            const small = document.createElement("small");
+            const plain = fold(c.text);
+            let p = -1;
+            for (const w of words) {
+              p = plain.indexOf(w);
+              if (p >= 0) break;
+            }
+            const start = Math.max(0, p - 45);
+            small.textContent =
+              (start ? "…" : "") +
+              c.text.slice(start, start + 155) +
+              (c.text.length > start + 155 ? "…" : "");
+            a.append(h, small);
+            a.addEventListener("click", (e) => {
+              e.preventDefault();
+              jump(c.id);
+            });
+            list.append(a);
+          }
+          results.hidden = false;
+          q.setAttribute("aria-expanded", "true");
+        }
+        q.addEventListener("input", render);
+        q.addEventListener("focus", () => {
+          if (q.value.trim()) render();
+        });
+        q.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            const first = list.querySelector("a");
+            if (!results.hidden && first) {
+              e.preventDefault();
+              jump(first.hash.slice(1));
+            }
+          } else if (e.key === "ArrowDown") {
+            const first = list.querySelector("a");
+            if (!results.hidden && first) {
+              e.preventDefault();
+              first.focus();
+            }
+          } else if (e.key === "Escape") {
+            closePanels();
+            q.blur();
+          }
+        });
+        clear.addEventListener("click", () => {
+          q.value = "";
+          render();
+          q.focus();
+        });
+        toggle.addEventListener("click", () => {
+          const open = toc.hidden;
+          closePanels();
+          toc.hidden = !open;
+          toggle.setAttribute("aria-expanded", String(open));
+          q.blur();
+        });
+        document.querySelectorAll("[data-jump]").forEach((a) =>
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            jump(a.dataset.jump);
+          }),
+        );
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest(".toolbar,.panel")) closePanels();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            closePanels();
+            toggle.focus();
+          }
+          if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+            e.preventDefault();
+            q.focus();
+            q.select();
+          }
+        });
+        let size = 16;
+        const persist = () => {
+          try {
+            localStorage.setItem(
+              "prv-reading-v1",
+              JSON.stringify({
+                size,
+                dark: document.body.classList.contains("dark"),
+              }),
+            );
+          } catch (e) {}
+        };
+        function setSize(n) {
+          size = Math.max(10, Math.min(22, n));
+          document.documentElement.style.setProperty("--size", size + "px");
+          $("font-status").textContent = size + " px";
+          persist();
+        }
+        $("smaller").addEventListener("click", () => setSize(size - 1));
+        $("larger").addEventListener("click", () => setSize(size + 1));
+        $("night").addEventListener("change", (e) => {
+          document.body.classList.toggle("dark", e.target.checked);
+          persist();
+        });
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("prv-reading-v1") || "null",
+          );
+          if (saved) {
+            if (Number.isFinite(saved.size))
+              size = Math.max(10, Math.min(22, saved.size));
+            document.documentElement.style.setProperty("--size", size + "px");
+            document.body.classList.toggle("dark", !!saved.dark);
+            $("night").checked = !!saved.dark;
+          }
+        } catch (e) {}
+        $("font-status").textContent = size + " px";
+        const bar = document.querySelector(".toolbar");
+        function sync() {
+          document.documentElement.style.setProperty(
+            "--top",
+            bar.getBoundingClientRect().height + "px",
+          );
+        }
+        if (window.ResizeObserver) new ResizeObserver(sync).observe(bar);
+        sync();
+      })();
+    </script>
+  </body>
+</html>
