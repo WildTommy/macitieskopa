@@ -3,151 +3,246 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f8f6f0" />
+    <meta name="theme-color" content="#0a1020" />
     <title>Mācību konspekti</title>
     <style>
       :root {
-        color-scheme: light;
-        --bg: #f8f6f0;
-        --text: #292d2a;
-        --muted: #5c625e;
-        --line: #cfd2c8;
-        --soft: #eceee6;
-        --accent: #3e5c49;
-        --error: #923e32;
+        color-scheme: dark;
+        --background: #0a1020;
+        --panel: #101a30;
+        --text: #f1f5ff;
+        --muted: #aebbd7;
+        --line: #283756;
+        --accent: #91aaff;
+        --error: #ffb0b9;
       }
-      * {
-        box-sizing: border-box;
-      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      [hidden] { display: none !important; }
+
       body {
+        min-height: 100vh;
+        min-height: 100dvh;
         margin: 0;
-        background: var(--bg);
         color: var(--text);
-        font:
-          16px/1.5 system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          sans-serif;
+        background:
+          radial-gradient(ellipse at 84% 5%, #1d2c62 0, transparent 45%),
+          radial-gradient(ellipse at 8% 90%, #12244c 0, transparent 46%),
+          var(--background);
+        font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
       }
+
+      .site-header, main {
+        width: min(1120px, calc(100% - 64px));
+        margin-inline: auto;
+      }
+
+      .site-header {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        min-height: 91px;
+        border-bottom: 1px solid #adc4ff24;
+        font-size: 15px;
+        font-weight: 650;
+        letter-spacing: .01em;
+      }
+
+      .site-mark {
+        display: grid;
+        width: 37px;
+        height: 37px;
+        place-items: center;
+        border: 1px solid #a0b9ff49;
+        border-radius: 12px;
+        background: #506bc92e;
+        color: #dbe5ff;
+      }
+
+      .site-mark svg, .choice-icon svg { width: 20px; height: 20px; }
+
       main {
-        width: 100%;
-        max-width: 500px;
-        margin: 32px auto;
-        padding: 0 16px;
+        display: grid;
+        grid-template-columns: 1.08fr 1fr;
+        min-height: 494px;
+        margin-block: clamp(42px, 8.5vh, 108px) 56px;
+        overflow: hidden;
+        border: 1px solid #a4bbff35;
+        border-radius: 29px;
+        background: var(--panel);
+        box-shadow: 0 30px 85px #03071280;
       }
+
+      .portal-content {
+        display: grid;
+        align-items: center;
+        padding: clamp(30px, 4.5vw, 66px);
+      }
+
+      .portal-content section:not([hidden]) { animation: appear 300ms ease-out both; }
+
       h1 {
-        font-size: 27px;
-        line-height: 1.25;
-        letter-spacing: -0.025em;
-        margin: 0 0 18px;
+        margin: 0 0 28px;
+        font-size: clamp(35px, 4.3vw, 54px);
+        font-weight: 730;
+        line-height: 1.05;
+        letter-spacing: -.055em;
+        text-wrap: balance;
       }
-      p {
-        margin: 8px 0 14px;
+
+      #menu-title { margin-bottom: 25px; font-size: clamp(31px, 3.7vw, 46px); }
+      .greeting { margin: 0 0 9px; color: #a9bcff; font-size: 14px; font-weight: 650; }
+      label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 14px; font-weight: 600; }
+      input, button { font: inherit; }
+
+      input, button {
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        transition: border-color 160ms ease, background-color 160ms ease,
+          box-shadow 160ms ease, transform 160ms ease;
       }
-      label {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 14px;
-        color: var(--muted);
-      }
-      input,
-      button {
-        font: inherit;
-      }
+
       input {
         display: block;
         width: 100%;
-        height: 46px;
-        padding: 9px 11px;
-        border: 1px solid var(--line);
-        border-radius: 5px;
-        background: var(--bg);
-        color: var(--text);
-        font-size: 16px;
+        min-height: 53px;
+        padding: 12px 15px;
+        background: #0a1327;
       }
-      button {
-        min-height: 44px;
-        border: 1px solid var(--line);
-        border-radius: 5px;
-        padding: 9px 13px;
-        background: var(--soft);
-        color: var(--text);
-        cursor: pointer;
-      }
-      button:focus-visible,
-      input:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 3px;
-      }
-      button:hover:not(:disabled) {
-        border-color: var(--accent);
-      }
+
+      input:hover { border-color: #526caa; }
+      input[aria-invalid="true"] { border-color: var(--error); }
+      :is(button, input):focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+      #menu-title:focus { outline: none; }
+      button { min-height: 44px; cursor: pointer; background: #14223d; }
+      button:disabled { cursor: default; opacity: .6; }
+
       .submit {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
         width: 100%;
-        margin-top: 12px;
-        background: var(--accent);
-        color: #fff;
-        border-color: var(--accent);
-      }
-      .status {
-        font-size: 14px;
-        color: var(--error);
-        margin: 10px 0 0;
-      }
-      .greeting {
-        color: var(--muted);
-        font-size: 14px;
-        margin-bottom: 8px;
-      }
-      .choices {
-        display: grid;
-        gap: 10px;
-      }
-      .choice {
-        width: 100%;
-        padding: 13px;
+        min-height: 53px;
+        margin-top: 13px;
+        padding: 12px 16px;
+        border-color: #7291ff77;
+        color: white;
+        background: linear-gradient(105deg, #3155d9, #4e46cb);
+        box-shadow: 0 8px 21px #08143685;
+        font-weight: 670;
         text-align: left;
-        line-height: 1.45;
       }
-      .choice strong {
-        display: block;
-        font-size: 16px;
-        font-weight: 650;
+
+      .submit::after, .choice::after { content: ""; width: 8px; height: 8px; border: solid currentColor; border-width: 1.5px 1.5px 0 0; transform: rotate(45deg); margin-right: 4px; }
+      .submit:hover:not(:disabled) { border-color: #c1d0ff; box-shadow: 0 8px 26px #476aff65; transform: translateY(-1px); }
+      .status { margin: 12px 0 0; color: var(--error); font-size: 14px; }
+
+      .choices { display: grid; gap: 9px; }
+      .choice {
+        --choice-color: #a8bcff;
+        display: grid;
+        grid-template-columns: 42px 1fr 14px;
+        align-items: center;
+        gap: 13px;
+        width: 100%;
+        min-height: 65px;
+        padding: 10px 13px;
+        text-align: left;
+        line-height: 1.28;
       }
-      .choice small {
-        display: block;
-        font-size: 13px;
-        color: var(--muted);
-        margin-top: 3px;
+
+      #sales { --choice-color: #92e1db; }
+      #pums { --choice-color: #c7b3ff; }
+      .choice-icon {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 10px;
+        color: var(--choice-color);
+        background: color-mix(in srgb, var(--choice-color) 13%, transparent);
       }
-      button:disabled {
-        cursor: default;
-        opacity: 0.65;
-      }
+
+      .choice::after { color: var(--choice-color); }
+      .choice strong, .choice small { display: block; }
+      .choice strong { font-size: 15px; font-weight: 650; }
+      .choice small { margin-top: 4px; color: var(--muted); font-size: 12px; }
+      .choice:hover { transform: translateY(-1px); border-color: #637fca; background: #1a2d53; }
+      .submit:active:not(:disabled), .choice:active { transform: translateY(1px); }
       .change-name {
         display: block;
-        margin-top: 18px;
-        background: transparent;
+        width: fit-content;
+        margin-top: 13px;
+        padding: 0 3px;
         border: 0;
-        padding: 7px 0;
-        font-size: 14px;
+        background: transparent;
         color: var(--muted);
+        font-size: 13px;
         text-decoration: underline;
-        text-underline-offset: 3px;
+        text-underline-offset: 4px;
       }
-      [hidden] {
-        display: none !important;
+      .change-name:hover { color: var(--text); }
+
+      .portal-art {
+        position: relative;
+        display: grid;
+        place-items: center;
+        isolation: isolate;
+        overflow: hidden;
+        border-left: 1px solid #b7caff2b;
+        background:
+          radial-gradient(ellipse at 63% 33%, #3f5bb8 0, transparent 59%),
+          radial-gradient(ellipse at 91% 81%, #343278 0, transparent 53%),
+          #131f3e;
       }
-      @media (min-width: 600px) {
-        main {
-          margin-top: 48px;
-        }
+
+      .portal-art::before {
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        content: "";
+        background-image: linear-gradient(#b7ccff16 1px, transparent 1px),
+          linear-gradient(90deg, #b7ccff16 1px, transparent 1px);
+        background-size: 32px 32px;
+        mask-image: radial-gradient(ellipse at center, #000, transparent 75%);
+      }
+
+      .portal-art > svg { width: 94%; max-width: 490px; height: auto; overflow: visible; }
+      .art-sheet { animation: drift 9s ease-in-out infinite alternate; }
+
+      @keyframes appear {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes drift {
+        from { transform: translateY(-3px); }
+        to { transform: translateY(7px); }
+      }
+
+      @media (max-width: 760px) {
+        .site-header, main { width: calc(100% - 36px); }
+        .site-header { min-height: 67px; }
+        main { grid-template-columns: 1fr; min-height: 0; margin-block: 26px 35px; border-radius: 21px; }
+        .portal-content { padding: 32px 24px; }
+        .portal-art { grid-row: 1; height: clamp(114px, 28vw, 160px); border-left: 0; border-bottom: 1px solid #b7caff2b; }
+        .portal-art > svg { position: absolute; width: 210px; max-width: 70%; }
+        h1 { margin-bottom: 22px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation: none !important; transition: none !important; }
       }
     </style>
   </head>
   <body>
+    <header class="site-header">
+      <span class="site-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6a8 8 0 0 0-8-2v14a8 8 0 0 1 8 2 8 8 0 0 1 8-2V4a8 8 0 0 0-8 2Zm0 0v14"/></svg></span>
+      <span>Mācību konspekti</span>
+    </header>
     <main>
+      <div class="portal-content">
       <section id="login" aria-labelledby="login-title">
         <h1 id="login-title">kā tevi sauc?</h1>
         <form id="name-form">
@@ -186,15 +281,18 @@
         <h1 id="menu-title" tabindex="-1">Izvēlies konspektu</h1>
         <div class="choices">
           <button id="project" class="choice" type="button">
-            <strong>Projektu vadība</strong>
-            <small>Tēmas 2., 3., 3.2</small>
+            <span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M10 10v10"/></svg></span>
+            <span><strong>Projektu vadība</strong>
+            <small>Tēmas 2., 3., 3.2</small></span>
           </button>
           <button id="sales" class="choice" type="button">
-            <strong>Preču realizācijas vadība (1.KD)</strong>
+            <span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4v16h16M8 15l4-5 4 2 4-6"/></svg></span>
+            <span><strong>Preču realizācijas vadība (1.KD)</strong></span>
           </button>
           <button id="pums" class="choice" type="button">
-            <strong>PUMS prezentācija</strong>
-            <small>Nike un Adidas salīdzinājums</small>
+            <span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg></span>
+            <span><strong>PUMS prezentācija</strong>
+            <small>Nike un Adidas salīdzinājums</small></span>
           </button>
         </div>
         <p
@@ -208,6 +306,36 @@
           Mainīt vārdu / iziet
         </button>
       </section>
+      </div>
+      <div class="portal-art" aria-hidden="true">
+        <svg viewBox="0 0 460 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="paper-surface" x1="106" y1="86" x2="349" y2="310" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#809CFF"/><stop offset="1" stop-color="#363C98"/>
+            </linearGradient>
+            <linearGradient id="paper-edge" x1="111" y1="84" x2="344" y2="296" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#C2D2FF"/><stop offset="1" stop-color="#6D7BD1"/>
+            </linearGradient>
+          </defs>
+          <circle cx="231" cy="201" r="169" stroke="#AFC4FF" stroke-opacity=".24"/>
+          <circle cx="231" cy="201" r="135" stroke="#AFC4FF" stroke-opacity=".25"/>
+          <path d="M43 201h376M231 13v376" stroke="#BFD0FF" stroke-opacity=".14" stroke-dasharray="4 6"/>
+          <circle cx="231" cy="32" r="4" fill="#A9E6ED"/>
+          <circle cx="399" cy="201" r="4" fill="#C6BCFF"/>
+          <circle cx="62" cy="201" r="3" fill="#A7BFFF"/>
+          <g class="art-sheet">
+            <rect x="143" y="120" width="198" height="189" rx="18" transform="rotate(12 143 120)" fill="#363C83" stroke="#AAB5FF" stroke-opacity=".58"/>
+            <rect x="96" y="123" width="198" height="189" rx="18" transform="rotate(-12 96 123)" fill="#355384" stroke="#A6D1FF" stroke-opacity=".62"/>
+            <rect x="131" y="94" width="200" height="213" rx="20" fill="url(#paper-surface)" stroke="url(#paper-edge)" stroke-width="1.5"/>
+            <rect x="156" y="120" width="52" height="52" rx="12" fill="#DCE6FF" fill-opacity=".19" stroke="#EAF2FF" stroke-opacity=".35"/>
+            <path d="M182 137a10 10 0 0 0-9-2v19a10 10 0 0 1 9 2 10 10 0 0 1 9-2v-19a10 10 0 0 0-9 2Zm0 0v19" stroke="#F3F7FF" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M157 202h113" stroke="#F3F7FF" stroke-opacity=".89" stroke-width="5" stroke-linecap="round"/>
+            <path d="M157 222h145m-145 15h123m-123 15h141m-141 15h88" stroke="#E0E8FF" stroke-opacity=".47" stroke-width="3" stroke-linecap="round"/>
+            <path d="M296 127v23l-8-5-8 5v-23" stroke="#F3F7FF" stroke-opacity=".82" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <path d="M354 71v16m-8-8h16M101 311v16m-8-8h16" stroke="#D0DCFF" stroke-opacity=".67" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
     </main>
 
     <script>
