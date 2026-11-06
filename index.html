@@ -155,9 +155,9 @@
           <input
             id="name"
             name="name"
-            type="text"
-            autocomplete="given-name"
-            autocapitalize="words"
+            type="password"
+            autocomplete="off"
+            autocapitalize="none"
             spellcheck="false"
             maxlength="80"
             aria-describedby="login-message"
@@ -190,8 +190,12 @@
             <small>Tēmas 2., 3., 3.2</small>
           </button>
           <button id="sales" class="choice" type="button">
-  <strong>Preču realizācijas vadība (1.KD)</strong>
-</button>
+            <strong>Preču realizācijas vadība (1.KD)</strong>
+          </button>
+          <button id="pums" class="choice" type="button">
+            <strong>PUMS prezentācija</strong>
+            <small>Nike un Adidas salīdzinājums</small>
+          </button>
         </div>
         <p
           id="menu-message"
@@ -210,8 +214,6 @@
       (() => {
         "use strict";
 
-        // Ja konspekta failu pārsauc, nomaini šo nosaukumu.
-        const PROJECT_FILE = "projektu-vadiba-konspekts.html";
         const AUTH_KEY = "macibas.auth.v1";
         const ENTRY_KEY = "macibas.entry.v1";
         const NAMES = { toms: "Toms", arta: "Arta", gabriela: "Gabriēla" };
@@ -331,14 +333,14 @@
           if (!$("submit").disabled) message("login-message", "");
         });
 
-        $("project").addEventListener("click", () => {
+        function openMaterial(file) {
           const auth = readAuth();
           if (!auth) {
             showLogin("Sesija ir beigusies. Ievadi vārdu vēlreiz.");
             return;
           }
           try {
-            const url = new URL(PROJECT_FILE, location.href);
+            const url = new URL(file, location.href);
             const entryToken = token();
             sessionStorage.setItem(
               ENTRY_KEY,
@@ -357,7 +359,11 @@
               "Konspektu neizdevās atvērt. Pamēģini ievadīt vārdu vēlreiz.",
             );
           }
-        });
+        }
+
+        $("project").addEventListener("click", () => openMaterial("projektu-vadiba-konspekts.html"));
+        $("sales").addEventListener("click", () => openMaterial("precu-realizacijas-vadiba.html"));
+        $("pums").addEventListener("click", () => openMaterial("PUMS-prezentacija.html"));
 
         $("change-name").addEventListener("click", () => {
           try {
@@ -366,51 +372,6 @@
           showLogin();
           $("name").focus();
         });
-
-// Pārbauda arī lapas atjaunošanu no pārlūka atmiņas ar pogu Atpakaļ.
-        window.addEventListener("pageshow", (event) => {
-          if (event.persisted) initialize();
-        });
-        // Otrās konspekta pogas darbība.
-        const salesButton = $("sales");
-
-        // Ja pogas vēl nav, sākumlapas pārējā darbība turpinās.
-        if (salesButton) {
-          salesButton.addEventListener("click", () => {
-            const auth = readAuth();
-
-            if (!auth) {
-              showLogin("Ievadi savu vārdu vēlreiz.");
-              return;
-            }
-
-            try {
-              const url = new URL(
-                "precu-realizacijas-vadiba.html",
-                location.href,
-              );
-              const entryToken = token();
-
-              sessionStorage.setItem(
-                ENTRY_KEY,
-                JSON.stringify({
-                  token: entryToken,
-                  session: auth.id,
-                  path: url.pathname,
-                  expires: Date.now() + 120000,
-                }),
-              );
-
-              url.searchParams.set("entry", entryToken);
-              location.assign(url.href);
-            } catch {
-              message(
-                "menu-message",
-                "Konspektu neizdevās atvērt. Ievadi vārdu vēlreiz.",
-              );
-            }
-          });
-        }
 
         // Atjauno sākumlapu, atgriežoties ar pārlūka pogu Atpakaļ.
         window.addEventListener("pageshow", (event) => {
