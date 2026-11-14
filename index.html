@@ -255,6 +255,11 @@
             <span><strong>PUMS prezentācija</strong>
             <small>Nike un Adidas salīdzinājums</small></span>
           </button>
+          <button id="sms" class="choice" type="button">
+            <span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg></span>
+            <span><strong>SMS un epasta prezentācija</strong>
+            <small>PVTM- 1.seminars</small></span>
+          </button>
           <a class="choice" href="riska_vadiba.html">
             <span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.7 4.8 3.4 17.6A1.6 1.6 0 0 0 4.8 20h14.4a1.6 1.6 0 0 0 1.4-2.4L13.3 4.8a1.5 1.5 0 0 0-2.6 0ZM12 10v3.5m0 3h.01"/></svg></span>
             <span><strong>Risku vadība</strong><small>Eksāmena konspekts</small></span>
@@ -461,6 +466,7 @@
         $("project").addEventListener("click", () => openMaterial("projektu-vadiba-konspekts.html"));
         $("sales").addEventListener("click", () => openMaterial("precu-realizacijas-vadiba.html"));
         $("pums").addEventListener("click", () => openMaterial("PUMS-prezentacija.html"));
+        $("sms").addEventListener("click", () => openMaterial("sms-un-epasts.html"));
 
         $("change-name").addEventListener("click", () => {
           try {
