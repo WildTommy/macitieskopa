@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Preču virzīšana tirgū · 1. kontroldarba konspekts</title>
+    <style>
+      html:not([data-study-access]) {
+        visibility: hidden !important;
+      }
+    </style>
+    <noscript>
+      <meta http-equiv="refresh" content="0;url=index.html?login=required" />
+    </noscript>
+    <script>
+      (() => {
+        const AUTH = "macibas.auth.v1";
+        const ENTRY = "macibas.entry.v1";
+
+        function checkAccess() {
+          let allowed = false;
+          try {
+            const auth = JSON.parse(sessionStorage.getItem(AUTH) || "null");
+            const validUser =
+              auth &&
+              typeof auth.id === "string" &&
+              auth.id.length === 32 &&
+              ["Toms", "Arta", "Gabriēla"].includes(auth.name);
+            const url = new URL(location.href);
+            const entryToken = url.searchParams.get("entry");
+
+            if (validUser && entryToken) {
+              const entry = JSON.parse(sessionStorage.getItem(ENTRY) || "null");
+              allowed = !!(
+                entry &&
+                entry.token === entryToken &&
+                entry.session === auth.id &&
+                entry.path === location.pathname &&
+                Number.isFinite(entry.expires) &&
+                entry.expires > Date.now()
+              );
+
+              if (allowed) {
+                // Vienreizējo ieejas atļauju patērē; pārlādei saglabā vēstures ierakstu.
+                sessionStorage.removeItem(ENTRY);
+                url.searchParams.delete("entry");
+                history.replaceState(
+                  {
+                    ...history.state,
+                    macibasAccess: {
+                      session: auth.id,
+                      path: location.pathname,
+                    },
+                  },
+                  "",
+                  url.href,
+                );
+              }
+            } else if (validUser) {
+              const grant = history.state && history.state.macibasAccess;
+              allowed = !!(
+                grant &&
+                grant.session === auth.id &&
+                grant.path === location.pathname
+              );
+            }
+          } catch {
+            allowed = false;
+          }
+
+          document.documentElement.toggleAttribute(
+            "data-study-access",
+            allowed,
+          );
+          if (!allowed) {
+            try {
+              sessionStorage.removeItem(AUTH);
+              sessionStorage.removeItem(ENTRY);
+            } catch {}
+            location.replace("index.html?login=required");
+          }
+        }
+
+        window.addEventListener("pagehide", () => {
+          document.documentElement.removeAttribute("data-study-access");
+        });
+        window.addEventListener("pageshow", checkAccess);
+        checkAccess();
+      })();
+    </script>
+  <style>
+    :root { color-scheme: light; --ink: #172a35; --muted: #485d68; --accent: #145b59; --line: #cfdcda; --soft: #eef6f4; --paper: #fff; }
+    * { box-sizing: border-box; }
+    html { scroll-padding-top: 7rem; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 1rem/1.65 system-ui, sans-serif; }
+    a { color: var(--accent); text-underline-offset: .2em; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .skip { position: absolute; left: 1rem; top: -5rem; background: var(--paper); z-index: 3; }
+    .skip:focus { top: 1rem; }
+    .wrap { width: min(100% - 2rem, 53rem); margin-inline: auto; }
+    .toolbar { position: sticky; top: 0; z-index: 2; background: var(--paper); border-bottom: 1px solid var(--line); }
+    .controls { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding-block: .65rem; }
+    input[type=search], button { min-height: 2.65rem; border: 1px solid #829f9d; border-radius: .35rem; color: var(--ink); background: var(--paper); font: inherit; padding: .35rem .65rem; }
+    input[type=search] { flex: 1; min-width: 9rem; }
+    button { cursor: pointer; }
+    button:hover { background: var(--soft); }
+    .results { margin: 0; padding: 0 0 .55rem; }
+    .results p { margin: 0; }
+    .results ul { margin: .2rem 0 0; max-height: 8rem; overflow: auto; }
+    [hidden] { display: none !important; }
+    main { padding-bottom: 3rem; }
+    header { padding: 2.25rem 0 .5rem; }
+    h1, h2, h3 { line-height: 1.2; }
+    h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.1rem); max-width: 23ch; }
+    h2 { font-size: clamp(1.4rem, 3vw, 1.8rem); margin: 0 0 .65rem; }
+    h3 { margin: 1.15rem 0 .4rem; font-size: 1.08rem; }
+    p { margin: .45rem 0 .8rem; }
+    .lead { color: var(--muted); max-width: 67ch; margin-top: .8rem; }
+    nav, .callout, .template { padding: .8rem 1rem; border: 1px solid var(--line); border-radius: .45rem; background: var(--soft); }
+    nav ul { display: flex; flex-wrap: wrap; gap: .35rem 1.25rem; padding: 0; margin: 0; list-style: none; }
+    section { border-top: 1px solid var(--line); padding-top: 1.35rem; margin-top: 1.75rem; }
+    article + article { border-top: 1px solid var(--line); margin-top: 1.2rem; }
+    ul, ol { padding-left: 1.4rem; margin: .45rem 0 .85rem; }
+    li + li { margin-top: .3rem; }
+    nav li + li { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; text-align: left; margin: .65rem 0 1rem; }
+    th, td { vertical-align: top; border-bottom: 1px solid var(--line); padding: .5rem .65rem; overflow-wrap: anywhere; }
+    thead th { background: var(--soft); }
+    .table { overflow: auto; }
+    .table table { min-width: 32rem; }
+    tbody th { min-width: 9.25rem; width: 22%; }
+    .cell-label { display: none; }
+    @media screen and (max-width: 42rem) {
+      .table table, tbody, tbody tr, tbody th, tbody td { display: block; width: 100%; min-width: 0; }
+      thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+      tbody tr { border: 1px solid var(--line); border-radius: .35rem; overflow: hidden; }
+      tbody tr + tr { margin-top: .65rem; }
+      tbody th { background: var(--soft); }
+      tbody th, tbody td { border: 0; }
+      tbody td + td { border-top: 1px solid var(--line); }
+      .cell-label { display: block; color: var(--muted); font-size: .86rem; font-weight: 650; margin-bottom: .15rem; }
+    }
+    .checks { list-style: none; padding: 0; }
+    .checks label { display: flex; align-items: baseline; gap: .5rem; cursor: pointer; }
+    .checks input { flex: none; accent-color: var(--accent); }
+    .small { color: var(--muted); font-size: .91rem; }
+    @media (max-width: 34rem) { html { scroll-padding-top: 9rem; } header { padding-top: 1.45rem; } .controls label { flex-basis: 100%; } }
+    @media print { .toolbar, nav, .skip, .back, #reset-checks { display: none; } .wrap { width: 100%; } header { padding-top: 0; } h2, h3 { break-after: avoid; } .template, tr { break-inside: avoid; } .table { overflow: visible; } .table table { min-width: 0; } }
+  </style>
+</head>
+<body id="sakums">
+  <a class="skip" href="#saturs">Uz saturu</a>
+  <div class="toolbar" id="search-tools" hidden>
+    <div class="wrap">
+      <div class="controls" role="search">
+        <label for="query">Meklēt konspektā</label>
+        <input id="query" type="search" placeholder="Svira, PUM, budžets…" autocomplete="off" aria-controls="results">
+        <button id="clear" type="button">Notīrīt</button>
+        <button id="print" type="button">Drukāt</button>
+      </div>
+      <div class="results" id="results" hidden>
+        <p id="count" role="status"></p>
+        <ul id="matches" hidden></ul>
+      </div>
+    </div>
+  </div>
+  <main class="wrap" id="saturs">
+    <header>
+      <h1>Preču virzīšana tirgū</h1>
+      <p class="lead">1. kontroldarba konspekts par 1.–5. tēmu ar lekciju atsaucēm, piemēriem un atbilžu šabloniem.</p>
+    </header>
+    <p><a href="index.html">Uz konspektu izvēlni</a></p><nav aria-label="Satura rādītājs">
+      <ul>
+        <li><a href="#uzdevumi">Abi uzdevumi</a></li>
+        <li><a href="#tema-1">1. Virzīšanas metodes</a></li>
+        <li><a href="#tema-2">2. Plānošana</a></li>
+        <li><a href="#tema-3">3. Mērķgrupas</a></li>
+        <li><a href="#tema-4">4. Pircēju rīcība</a></li>
+        <li><a href="#tema-5">5. Komunikācijas mērķi</a></li>
+        <li><a href="#prakse">Atbilžu paraugi</a></li>
+        <li><a href="#rekomendacija">1. uzdevuma šablons</a></li>
+        <li><a href="#piemers">2. uzdevuma šablons</a></li>
+        <li><a href="#avoti">Lekciju avoti</a></li>
+        <li><a href="#parbaude">Pārbaudes saraksts</a></li>
+      </ul>
+    </nav>
+
+    <section id="uzdevumi" data-find aria-labelledby="uzdevumi-title">
+      <h2 id="uzdevumi-title">Ko prasa abi uzdevumi</h2>
+      <p>Kontroldarbs aptver 1.–5. tēmu. Abos uzdevumos drīkst izmantot lekciju materiālus un grāmatas. Sāc ar uzdevumā prasīto virzīšanas aspektu un atver materiālā tieši to jēdzienu, kas palīdz izskaidrot situāciju.</p>
+      <div class="table" role="region" aria-label="Abu uzdevumu salīdzinājums" tabindex="0"><table role="table">
+        <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Uzdevums</th><th scope="col" role="columnheader">Ko sniegt</th><th scope="col" role="columnheader">Ko pamatot</th></tr></thead>
+        <tbody role="rowgroup">
+          <tr role="row"><th scope="row" role="rowheader">1. Rekomendācija</th><td role="cell"><span class="cell-label" aria-hidden="true">Ko sniegt</span>Konkrētu rīcību dotajam uzņēmumam.</td><td role="cell"><span class="cell-label" aria-hidden="true">Ko pamatot</span>Kāpēc tā der uzņēmuma mērķim un auditorijai, un pēc kā spriest par rezultātu.</td></tr>
+          <tr role="row"><th scope="row" role="rowheader">2. Piemērs</th><td role="cell"><span class="cell-label" aria-hidden="true">Ko sniegt</span>Konkrētas situācijas aprakstu ar novērojamām detaļām.</td><td role="cell"><span class="cell-label" aria-hidden="true">Ko pamatot</span>Kā tajā izpaužas prasītais teorijas jēdziens un ko ļauj secināt pieejamā informācija.</td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>Teorijas un prakses saite.</strong> Nosauc jēdzienu, sasaisti to ar konkrētu detaļu un izskaidro, kā šī saikne ietekmē izvēli, auditorijas rīcību vai vērtējumu.</p>
+    </section>
+
+    <section id="tema-1" aria-labelledby="tema-1-title">
+      <h2 id="tema-1-title">1. Mārketinga komunikāciju raksturojums</h2>
+      <article id="komunikacijas-process" data-find>
+        <h3>Komunikācijas process, modeļi un pircēja reakcija</h3>
+        <p><strong>Mārketinga komunikācijas (MK)</strong> nodod mērķauditorijai informāciju par produktu, pakalpojumu vai ideju, lai ietekmētu tās uztveri un rīcību. Virzīšana ir viena no 4P sastāvdaļām kopā ar produktu, cenu un sadali. Komunikāciju plāno kopā ar pārējiem elementiem. Ja reklāma sola pieejamību, precei jābūt tur, kur pircējs to meklēs.</p>
+        <p>Sūtītājs formulē ideju, kodē to vēstījumā un nodod kanālā. Saņēmējs vēstījumu atkodē, reaģē, un uzņēmums var saņemt atgriezenisko saiti. <strong>Troksnis</strong> ir jebkas, kas traucē uztvert paredzēto nozīmi. Piemēram, makets var būt pamanāms, bet ar nesaprotamu piedāvājuma tekstu. Viens pret daudziem ir tipisks masu saziņas modelis. Divvirzienu modelī auditorija atbild. Divpakāpju modelī vēstījumu pārnes viedokļu līderi. Daudzpakāpju un tīmekļa modeļos vēstījumu pārveido un nodod tālāk vairāki dalībnieki, tostarp paši pircēji.</p>
+        <p><strong>AIDA</strong> palīdz izplānot uzmanību, interesi, vēlmi un darbību. Piemēram, īss video piesaista uzmanību, produkta salīdzinājums rada interesi, demonstrācija padara ieguvumu ticamu, un saite aizved uz izmēģinājuma piedāvājumu. Pircējs dažādos saskares punktos var atgriezties pie iepriekšējā soļa. Izvēlies vēstījumu pēc tā, kāda reakcija vajadzīga konkrētajā brīdī.</p>
+        <p class="small">E 1.1, 9.–31. slaids.</p>
+      </article>
+      <article id="virzisanas-metodes" data-find>
+        <h3>Virzīšanas metožu izvēle</h3>
+        <div class="table" role="region" aria-label="Virzīšanas metožu salīdzinājums" tabindex="0"><table role="table">
+          <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Metode</th><th scope="col" role="columnheader">Ko tā dara</th><th scope="col" role="columnheader">Praktiska izvēle</th></tr></thead>
+          <tbody role="rowgroup">
+            <tr role="row"><th scope="row" role="rowheader">Reklāma</th><td role="cell"><span class="cell-label" aria-hidden="true">Ko tā dara</span>Apmaksāta, nepersoniska komunikācija ar identificējamu reklāmdevēju. Informē, pārliecina un atgādina.</td><td role="cell"><span class="cell-label" aria-hidden="true">Praktiska izvēle</span>Video vai vides reklāma, ja auditorijai vispirms jāuzzina, ka zīmols pastāv. Produkta reklāma izceļ piedāvājumu, institucionālā reklāma veido priekšstatu par organizāciju.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Noieta stimulēšana (NS)</th><td role="cell"><span class="cell-label" aria-hidden="true">Ko tā dara</span>Stimuls noteiktai rīcībai. Mērķa dalībnieks var būt gala pircējs, starpnieks vai pārdošanas personāls.</td><td role="cell"><span class="cell-label" aria-hidden="true">Praktiska izvēle</span>Pircējam paraugs vai kupons. Tirgotājam atbalsts plaukta ekspozīcijai. Pārdevējam apmācības vai motivācijas programma.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Sabiedriskās attiecības (PR)</th><td role="cell"><span class="cell-label" aria-hidden="true">Ko tā dara</span>Veido un uztur attiecības ar ieinteresētajām pusēm, rūpējas par informāciju, uzticēšanos un reputāciju.</td><td role="cell"><span class="cell-label" aria-hidden="true">Praktiska izvēle</span>Atbildēt uz mediju jautājumiem, informēt darbiniekus, rīkot atvērto durvju dienu vai sniegt pārbaudāmus faktus krīzes situācijā. Instrumentu izvēlas pēc tā, kam informācija ir vajadzīga.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Tiešais mārketings</th><td role="cell"><span class="cell-label" aria-hidden="true">Ko tā dara</span>Tieša uzruna identificējamam saņēmējam ar iespēju saņemt un mērīt atbildi. Datu kvalitāte un sūtījuma atbilstība nosaka personalizācijas vērtību.</td><td role="cell"><span class="cell-label" aria-hidden="true">Praktiska izvēle</span>Personīgs e-pasts ar salīdzināmu preču izlasi vai īss termiņa atgādinājums. Kanāls ir e-pasts, un kupons tajā ir noieta stimulēšanas instruments.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Personiskā apkalpošana</th><td role="cell"><span class="cell-label" aria-hidden="true">Ko tā dara</span>Saruna ļauj izzināt vajadzību, demonstrēt risinājumu, atbildēt uz iebildumiem un pielāgot piedāvājumu. Katrs kontakts prasa darbinieka laiku.</td><td role="cell"><span class="cell-label" aria-hidden="true">Praktiska izvēle</span>B2B iekārtai nosaka potenciālos klientus, sagatavojas, sazinās, demonstrē, pārrunā iebildumus, vienojas un uztur pēcpirkuma attiecības.</td></tr>
+          </tbody>
+        </table></div>
+        <p><strong>ATL, BTL un TTL.</strong> ATL ir masu mediju reklāma. BTL aptver, piemēram, stimulēšanu, tiešo mārketingu, izstādes un reklāmas materiālus pārdošanas vietā (POS). TTL savieno abu pieeju rīkus. Klasificējot sarežģītu kampaņu, nosauc katra instrumenta funkciju.</p>
+        <p><strong>Integrētās mārketinga komunikācijas (IMK)</strong> saskaņo vēstījumu, zīmola pazīmes, kampaņas laiku un instrumentu lomas. Ja veikals demonstrē jaunu zīmolu reklāmā, plaukta materiālos izmanto tos pašus vizuālos signālus, bet paraugu dod, lai pircējs varētu pārbaudīt solīto ieguvumu.</p>
+        <p class="small">E 1.1, 32.–43. slaids. E 1.2, 3.–50. slaids.</p>
+      </article>
+      <article id="dzives-cikls" data-find>
+        <h3>Dzīves cikls un seši efektivitātes posmi</h3>
+        <p><strong>Ieviešanā</strong> skaidro ieguvumu un rosina izmēģinājumu. <strong>Izaugsmē</strong> izceļ atšķirību un piesaista jaunus pircējus. <strong>Briedumā</strong> zīmola komunikācija palīdz uzturēt attieksmi un lojalitāti, bet stimulēšana aktivizē izvēlētas grupas. <strong>Kritumā</strong> plašu reklāmu parasti samazina un var fokusēties uz izplatīšanas partneriem. Tirgus tips maina instrumentu svaru. Sarežģītam B2B risinājumam lielāka loma ir personiskai pārdošanai, savukārt ikdienas patēriņa precēm noder liela sasniedzamība un stimuli pirkuma vietā.</p>
+        <p><strong>Efektivitātes ķēde.</strong> Kontakts → informācijas apstrāde → komunikācijas efekti un pozicionējums → mērķa pircēju darbība → pārdošana, tirgus daļa un zīmola vērtība → peļņa. Sasaisti rādītāju ar posmu. Sasniegtie cilvēki rāda kontaktu, aptaujā mērīta atcerēšanās rāda komunikācijas efektu, pirmie pirkumi rāda rīcību, un peļņai jāņem vērā ieņēmumi un izmaksas.</p>
+        <p class="small">E 1.1, 44.–67. slaids. E 2.1, 8.–26. slaids.</p>
+      </article>
+    </section>
+
+    <section id="tema-2" aria-labelledby="tema-2-title">
+      <h2 id="tema-2-title">2. Mārketinga komunikāciju plānošana</h2>
+      <article id="planosanas-posmi" data-find>
+        <h3>Plāna posmi un saikne ar uzņēmuma mērķiem</h3>
+        <ol>
+          <li>Analizē situāciju, konkurenci, tirgu, produktu un dzīves ciklu. Pārbaudi sociālekonomiskos, tehnoloģiskos un tiesiskos apstākļus, auditorijas uzvedību un sadales kanālus.</li>
+          <li>Saskaņo MK plānu ar uzņēmuma mērķi, laiku un budžetu. Nosaki mērķtirgu un auditoriju, modelē pircēju rīcību, formulē komunikācijas mērķus un vēlamo pozicionējumu.</li>
+          <li>Izstrādā vēstījuma saturu, struktūru un formu. Izvēlies virzīšanas metodes, medijus, grafiku un atbildīgos. Īsteno plānu un mēri efektu.</li>
+        </ol>
+        <p><strong>Mērķis</strong> nosaka vēlamo rezultātu. <strong>Uzdevums</strong> to konkretizē laikā. <strong>Stratēģija</strong> ir pieeja mērķa sasniegšanai, un <strong>taktika</strong> ir konkrētais solis. Piemēram, mērķis ir palielināt noietu, uzdevums ir iegūt 300 pirmos pirkumus sešās nedēļās, stratēģija ir veicināt izmēģināšanu prioritārajā segmentā, un taktika ir divas degustāciju nedēļas nogales trijos veikalos.</p>
+        <p><strong>Matrica «uzņēmuma mērķis × laiks».</strong> Nosaki, vai jāpalielina cena, jāsamazina izmaksas vai jāpalielina noiets. Augstākai cenai pamato vērtību. Izmaksu samazināšanai precizē mērķēšanu un seko izmaksām uz kontaktu vai darbību. Noietam izvēlies jaunu pircēju piesaisti, biežāku pirkumu vai lielāku pirkuma apjomu. Īstermiņā uzsvars parasti ir uz rīcību, vidējā termiņā uz pieprasījumu un pozicionējumu, ilgtermiņā uz zīmola vērtību, reputāciju un lojalitāti.</p>
+        <p class="small">E 2.1, 2.–55. slaids, īpaši 7., 21., 28.–35. slaids.</p>
+      </article>
+      <article id="budzeta-metodes" data-find>
+        <h3>Budžeta metodes un izvēle pēc tirgus situācijas</h3>
+        <div class="table" role="region" aria-label="Mārketinga komunikāciju budžeta metodes" tabindex="0"><table role="table">
+          <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Metode</th><th scope="col" role="columnheader">Kā to lietot</th></tr></thead>
+          <tbody role="rowgroup">
+            <tr role="row"><th scope="row" role="rowheader">Mērķi–uzdevumi</th><td role="cell"><span class="cell-label" aria-hidden="true">Kā to lietot</span>Nosaka mērāmu rezultātu, vajadzīgās aktivitātes un katras izmaksas. Īpaši lietderīga jaunā kategorijā vai jaunam zīmolam. Ja pieejami pārejas koeficienti, aprēķina nepieciešamos kontaktus, virzoties atpakaļ no pircēja rīcības uz kontakta posmu.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Procenti no realizācijas</th><td role="cell"><span class="cell-label" aria-hidden="true">Kā to lietot</span>Pārdošanas apjomu reizina ar izvēlēto procentu. Ātrs finanšu orientieris, kas pats par sevi nepasaka, vai summa pietiks mērķim. Krītošs noiets var mehāniski samazināt budžetu.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Konkurentu paritāte</th><td role="cell"><span class="cell-label" aria-hidden="true">Kā to lietot</span>Salīdzina ar konkurentu komunikācijas intensitāti. Noder kā kontroles orientieris esošam zīmolam. Ņem vērā atšķirīgu zīmola stāvokli, mērķus un resursus.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Ekspertu vērtējums</th><td role="cell"><span class="cell-label" aria-hidden="true">Kā to lietot</span>NVP apvieno neatkarīgas ekspertu prognozes. Lodiša piecu jautājumu metode aplēš noietu pie bāzes budžeta, nulles budžeta, maksimālās atdeves scenārija, kā arī pie bāzes budžeta −50 % un +50 %.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Modelēšana</th><td role="cell"><span class="cell-label" aria-hidden="true">Kā to lietot</span>Saista komunikācijas ieguldījumu ar pārdošanu un izmaksām, lai meklētu maksimālās peļņas punktu. Papildu noiets pēc šā punkta var samazināt peļņu.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Ieviešanas secība</th><td role="cell"><span class="cell-label" aria-hidden="true">Kā to lietot</span>Jaunam zīmolam esošā kategorijā izmanto tirgū ienākšanas kārtību un līdzīgu gadījumu datus kā atbalstu tirgus daļas un resursu aplēsei.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Tirgus tests un statistika</th><td role="cell"><span class="cell-label" aria-hidden="true">Kā to lietot</span>Testa reklāmu izmēģina salīdzināmos tirgos vai auditorijās pirms mērogošanas. Statistiskā prognozēšana izmanto pietiekamu esoša zīmola datu vēsturi. Ņem vērā sezonalitāti, cenu un sadali.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Šroera metode</th><td role="cell"><span class="cell-label" aria-hidden="true">Kā to lietot</span>Esošam zīmolam vairākos lokālos tirgos salīdzina reklāmas daļu un tirgus daļu ar konkurenta rādītājiem, lai izlemtu, kuros tirgos koncentrēt resursus.</td></tr>
+          </tbody>
+        </table></div>
+        <p class="callout"><strong>Aprēķina piemērs.</strong> Ja vajag 120 izmēģinājumus un katrs desmitais sasniegtais cilvēks pēc pieņēmuma izmēģinās preci, vajag ap 1200 unikālu kontaktu. Ja 1000 šādu kontaktu izmaksā 80 €, medijam plāno 96 €. Atsevišķi pieskaita satura izveidi, paraugus un mērījumus. Ja testā izmēģina tikai 5 %, vajag 2400 kontaktu vai jāuzlabo piedāvājums.</p>
+        <p class="small">E 2.1, 56.–129. slaids, īpaši 62.–63., 71.–98., 110.–126. slaids. Aprēķina skaitļi ir ilustratīvi.</p>
+      </article>
+    </section>
+
+    <section id="tema-3" aria-labelledby="tema-3-title">
+      <h2 id="tema-3-title">3. Pircēju mērķgrupu noteikšana</h2>
+      <article id="merkauditorija" data-find>
+        <h3>Mērķtirgus, mērķauditorija un piecas pircēju grupas</h3>
+        <p><strong>Mērķtirgu</strong> apkalpo uzņēmuma kopējais mārketinga komplekss. <strong>Mērķauditorija</strong> ir konkrētās kampaņas saņēmēji. Apraksti auditoriju ar pazīmēm, kas maina komunikāciju. Ģeogrāfija palīdz noteikt vietu un sasniedzamību, demogrāfija un ekonomiskie apstākļi raksturo dzīves posmu un pirktspēju, sociālās un kultūras pazīmes atklāj normas un kontekstu, psihogrāfija raksturo dzīvesveidu, vērtības un motīvus. Uzvedības dati rāda, ko pircējs jau ir darījis.</p>
+        <p><strong>Kompetence → attieksme → uzvedība.</strong> Pārbaudi, cik labi grupa pārzina kategoriju un zīmolu, kā to vērtē un kurus zīmolus faktiski pērk. Tā var atšķirt divus pēc vecuma līdzīgus klientus, kam vajadzīgs atšķirīgs vēstījums.</p>
+        <div class="table" role="region" aria-label="Piecas pircēju grupas un to mērķa uzvedība" tabindex="0"><table role="table">
+          <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Grupa</th><th scope="col" role="columnheader">Esošā uzvedība</th><th scope="col" role="columnheader">Iespējamais mērķis</th></tr></thead>
+          <tbody role="rowgroup">
+            <tr role="row"><th scope="row" role="rowheader">Jaunie kategorijas lietotāji</th><td role="cell"><span class="cell-label" aria-hidden="true">Esošā uzvedība</span>Kategoriju vēl nelieto vai sāk iepazīt.</td><td role="cell"><span class="cell-label" aria-hidden="true">Iespējamais mērķis</span>Kategorijas izmēģinājums. Izskaidro situāciju, kurā prece noder.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Mūsu zīmolam lojālie</th><td role="cell"><span class="cell-label" aria-hidden="true">Esošā uzvedība</span>Regulāri izvēlas mūsu zīmolu.</td><td role="cell"><span class="cell-label" aria-hidden="true">Iespējamais mērķis</span>Saglabāt atkārtotus pirkumus, veicināt lietošanas biežumu vai apjomu.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Mūsu zīmola nepastāvīgie</th><td role="cell"><span class="cell-label" aria-hidden="true">Esošā uzvedība</span>Pērk mūsu un citus zīmolus.</td><td role="cell"><span class="cell-label" aria-hidden="true">Iespējamais mērķis</span>Palielināt mūsu zīmola pirkumu daļu, biežumu vai atkārtojumu.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Citu zīmolu nepastāvīgie</th><td role="cell"><span class="cell-label" aria-hidden="true">Esošā uzvedība</span>Maina citus zīmolus, mūsu zīmolu parasti nepērk.</td><td role="cell"><span class="cell-label" aria-hidden="true">Iespējamais mērķis</span>Panākt mūsu zīmola izmēģinājumu. Noskaidro, vai šķērslis ir nezināšana, pieejamība vai iepriekšējs noraidījums.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Citam zīmolam lojālie</th><td role="cell"><span class="cell-label" aria-hidden="true">Esošā uzvedība</span>Regulāri dod priekšroku konkurentam.</td><td role="cell"><span class="cell-label" aria-hidden="true">Iespējamais mērķis</span>Izvērtēt izmēģinājumu, ja ir ticama priekšrocība un pāreju var atvieglot. Piesaistīšana parasti prasa vairāk resursu.</td></tr>
+          </tbody>
+        </table></div>
+        <p>Detalizācijai lekcija piedāvā 12 apakšgrupas. Tajās nošķir lojalitāti vienam vai vairākiem zīmoliem, regulārus un eksperimentējošus nepastāvīgos pircējus, kā arī jaunus vai konkurentam lojālus pircējus pēc kompetences un attieksmes pret piedāvājumu.</p>
+        <p class="small">E 3, 2.–35. un 57.–68. slaids. Divpadsmit apakšgrupu saraksts ir 34. slaidā.</p>
+      </article>
+      <article id="svira-pirkumi" data-find>
+        <h3>Sviras metode, izmēģinājums un atkārtots pirkums</h3>
+        <p><strong>Sviras metode</strong> palīdz sašaurināt auditoriju. Katrai grupai novērtē sasniedzamību, atsaucību, dzīves ciklu, gaidāmo papildu rezultātu un izmaksas. Augstāku sviru izmanto primārās auditorijas izvēlei. Sekundārā auditorija var būt esošie lojālie pircēji, kuriem uztur attiecības.</p>
+        <ul>
+          <li><strong>Peļņas svira</strong> = gaidāmais papildu peļņas efekts pirms kampaņas izmaksām ÷ MK izmaksas. Piemērs no lekcijas. 800 × 15 € ÷ 8000 € = <strong>1,50</strong>. Pēc aplēses peļņas efekts par 4000 € pārsniedz izmaksas. Koeficientu virs 1 vērtē kopā ar aplēses ticamību.</li>
+          <li><strong>Noieta svira</strong> = pircēju skaits × (plānotais noiets uz pircēju − sākotnējais noiets uz pircēju) ÷ MK budžeta pieaugums. Piemēram, 800 × (55 € − 40 €) ÷ 6000 € = <strong>2,0</strong> jeb 2 € plānotā papildu noieta uz 1 € papildu budžeta. Lai novērtētu peļņu, vajag informāciju par izmaksām un maržu.</li>
+          <li><strong>Izmēģinājuma pirkumu norma</strong> = pircēji, kas iegādājušies produktu vismaz reizi ÷ visi potenciālie pircēji attiecīgajā mērķgrupā × 100 %. Norādi periodu un datu avotu. Vēsturiskas normas izmanto kā metodikas ilustrāciju.</li>
+          <li><strong>Erenberga (Ehrenberg) metode.</strong> Jaunam zīmolam zināmā kategorijā izmanto līdzīgu zīmolu pirkšanas biežumu. Pie mērķa 200 vienību gadā un salīdzināmā biežuma 4 vienības uz pircēju vajadzīgi ap 50 pircēju. Aplēse balstās pirkumu biežuma un kategorijas salīdzināmības pieņēmumā.</li>
+          <li><strong>Atkārtotā pirkuma likme (RPR)</strong> = periodā vismaz divreiz pirkušie ÷ visi pircēji periodā × 100 %. No 1000 pircējiem 320 atkārtoti pircēji dod 32 %. Pirkšanas biežums ir pirkumu skaits uz unikālu pircēju. Ilglietojamai precei īsā periodā vērtīgāks var būt lietošanas, rekomendēšanas vai nākamā pirkuma nodoma rādītājs.</li>
+        </ul>
+        <p><strong>Sadales dalībnieku mērķi.</strong> Tirgotājam pirmais pasūtījums atbilst izmēģinājumam, pārpasūtījums atbilst atkārtojumam. Ar pirkumu saistītās darbības ir redzams izvietojums, demonstrācija un rekomendācija.</p>
+        <p class="small">E 3, 35.–56., 69.–107. slaids. Aprēķinu piemēri 52.–54., 79., 86. un 102. slaidā.</p>
+      </article>
+    </section>
+
+    <section id="tema-4" aria-labelledby="tema-4-title">
+      <h2 id="tema-4-title">4. Pircēju rīcības modelēšana</h2>
+      <article id="pum-lpp" data-find>
+        <h3>Patērētāju uzvedības modelis (PUM) un lēmuma pieņemšanas process (LPP)</h3>
+        <p>Lekcijas paraugā ir četri pamatposmi. Katra posma izvērtējumā ieraksti <strong>ko dara, kas, kur, kad un kā</strong>. Sarežģītu pirkumu sadali detalizētāk, piemēram, atsevišķi norādi budžeta pārbaudi un alternatīvu salīdzināšanu. Ierastā pirkumā posmi var saplūst. Kontakts ar vēstījumu un tā apstrāde var notikt vairākos LPP posmos.</p>
+        <div class="table" role="region" aria-label="Pirkšanas lēmuma posmi un saskares punkti" tabindex="0"><table role="table">
+          <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Posms</th><th scope="col" role="columnheader">Piemērs · darba krēsls</th><th scope="col" role="columnheader">Komunikācijas uzdevums</th></tr></thead>
+          <tbody role="rowgroup">
+            <tr role="row"><th scope="row" role="rowheader">Vajadzības rašanās</th><td role="cell"><span class="cell-label" aria-hidden="true">Piemērs · darba krēsls</span>Lietotājs pamana, ka esošo krēslu ir grūti noregulēt.</td><td role="cell"><span class="cell-label" aria-hidden="true">Komunikācijas uzdevums</span>Iesāk ar atpazīstamu problēmu un skaidru ieguvumu.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Meklēšana un izvērtēšana</th><td role="cell"><span class="cell-label" aria-hidden="true">Piemērs · darba krēsls</span>Lietotājs internetā salīdzina izmērus, darba devējs vērtē cenu.</td><td role="cell"><span class="cell-label" aria-hidden="true">Komunikācijas uzdevums</span>Lietotājam parāda izmērus un regulēšanu, lēmējam sniedz cenu un garantijas salīdzinājumu.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Pirkums</th><td role="cell"><span class="cell-label" aria-hidden="true">Piemērs · darba krēsls</span>Pirkuma veicējs pirms pasūtījuma pārbauda piegādi un atgriešanas kārtību.</td><td role="cell"><span class="cell-label" aria-hidden="true">Komunikācijas uzdevums</span>Padara nosacījumus viegli atrodamus un atvieglo pasūtīšanu.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Patēriņš un lietošana</th><td role="cell"><span class="cell-label" aria-hidden="true">Piemērs · darba krēsls</span>Lietotājs saņem krēslu, to noregulē un vērtē pieredzi.</td><td role="cell"><span class="cell-label" aria-hidden="true">Komunikācijas uzdevums</span>Nodrošina uzstādīšanas norādes, servisu un iespēju atsaukties.</td></tr>
+          </tbody>
+        </table></div>
+        <p><strong>Piecas pamatlomas.</strong> Iniciators nosauc vajadzību. Ietekmētājs nosaka kritērijus vai iesaka zīmolu. Lēmējs izvēlas. Pirkuma veicējs noformē pirkumu. Izmantotājs lieto. Viena persona var pildīt vairākas lomas. Papildu lomas ir informācijas «sargs», konsultants, noraidītājs, atbalstu sniedzošs lēmējs, sagatavotājs, patēriņa uzraugs, servisa atbalstītājs un likvidators. Piemēram, iepirkuma koordinators filtrē piedāvājumus, bet tehniķis vērtē uzstādīšanas prasības.</p>
+        <p><strong>Kur un kad.</strong> Saskares punktu nosaka komunikācijas pieejamība un troksnis, citu lomu klātbūtne, steiga, kā arī cilvēka fiziskais vai emocionālais stāvoklis. Pieskaņo grafiku pirkuma ciklam. Jaunam klientam var būt vajadzīgs ilgāks izvērtējums, savukārt lojāls pircējs informāciju meklē īsāk. Izmanto intervijas un reālus uzvedības datus, lai pārbaudītu, kur un kad lēmums faktiski notiek.</p>
+        <p class="small">E 4, 5.–63. slaids. Modeļa matrica 53. slaidā, lomas 29.–40. slaidā.</p>
+      </article>
+      <article id="profilesana" data-find>
+        <h3>Dalībnieku profilēšana un Raisa pārejas modelis</h3>
+        <p>Apraksti katras būtiskās lomas pašreizējo un vēlamo uzvedību, kā arī šobrīd esošos un vajadzīgos komunikācijas efektus pret kategoriju un zīmolu. Pēc tam atlasi papildu mainīgos, kas maina kanālu, izvietošanas grafiku vai vēstījumu. Tie var būt reālie kontakti ar medijiem, demogrāfija, dzīvesveids, personības iezīmes un noskaņojums.</p>
+        <p><strong>Raisa pārejas modelī</strong> attieksmes ievainojamību vērtē pēc uztvertā zīmola maiņas riska un alternatīvu vērtējuma. <strong>Perspektīvie</strong> redz līdzvērtīgas alternatīvas un zemu maiņas risku. <strong>Apmierinātie</strong> maiņu uzskata par vieglu, taču alternatīvas vērtē zemāk. <strong>Saistītie</strong> saskata augstu maiņas risku arī tad, ja kāds alternatīvs piedāvājums šķiet izdevīgāks. <strong>Ierakušies</strong> saskata gan augstu maiņas risku, gan sliktākas alternatīvas. Ja konkurenta pircēju kavē pārejas grūtības, praktisks pasākums būtu demonstrācija un pārejas atbalsts.</p>
+        <p class="small">E 4, 64.–102. slaids, īpaši 65.–79. slaids.</p>
+      </article>
+    </section>
+
+    <section id="tema-5" aria-labelledby="tema-5-title">
+      <h2 id="tema-5-title">5. Mārketinga komunikāciju mērķu noteikšana</h2>
+      <article id="komunikacijas-efekti" data-find>
+        <h3>Pieci komunikācijas efekti un to mērīšana</h3>
+        <p>Komunikācijas efekti ir auditorijā izveidojušās asociācijas, zināšanas, vērtējumi un gatavība rīkoties. Laba pozicionēšana sasaista zīmolu ar saprotamu kategoriju un nozīmīgu, atšķirīgu ieguvumu. Izvēlies efektu, kas dotajā situācijā kavē vajadzīgo rīcību. Formulē auditoriju, sākuma līmeni, vēlamo izmaiņu, termiņu un datu ieguves veidu.</p>
+        <div class="table" role="region" aria-label="Pieci komunikācijas efekti" tabindex="0"><table role="table">
+          <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Efekts</th><th scope="col" role="columnheader">Praktiska izpausme</th><th scope="col" role="columnheader">Kā to pārbaudīt</th></tr></thead>
+          <tbody role="rowgroup">
+            <tr role="row"><th scope="row" role="rowheader">1. Vajadzība pēc kategorijas</th><td role="cell"><span class="cell-label" aria-hidden="true">Praktiska izpausme</span>Cilvēks saskata neatbilstību starp esošo un vēlamo stāvokli un saprot kategorijas lietderību. Acīmredzamu vajadzību var neuzsvērt, piemirstu aktualizē, vāju vai neapzinātu izskaidro.</td><td role="cell"><span class="cell-label" aria-hidden="true">Kā to pārbaudīt</span>Aptaujā pārbauda, cik cilvēku saskata vajadzību un saprot kategorijas risinājumu.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">2. Zīmola kompetence un izpratne</th><td role="cell"><span class="cell-label" aria-hidden="true">Praktiska izpausme</span>Pie plaukta vajag atpazīt zīmolu pēc pazīmēm. Pirms izvēles ārpus veikala vajag to atsaukt atmiņā pēc kategorijas vajadzības. Iepriekšēju izvēli pie plaukta var apstiprināt ar atpazīšanu.</td><td role="cell"><span class="cell-label" aria-hidden="true">Kā to pārbaudīt</span>Atpazīšana ar parādītu zīmi vai iepakojumu. Spontāna atcerēšanās ar kategorijas jautājumu, kas zīmolu nenosauc.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">3. Attieksme pret zīmolu</th><td role="cell"><span class="cell-label" aria-hidden="true">Praktiska izpausme</span>Vērtējums par to, cik labi zīmols atbilst pircēja motīvam. Pēc sākotnējās attieksmes to izveido, uzlabo, saglabā, modificē vai maina.</td><td role="cell"><span class="cell-label" aria-hidden="true">Kā to pārbaudīt</span>Pirms un pēc kampaņas izmēra viena un tā paša ieguvuma vērtējumu un zīmola labvēlīga vērtējuma īpatsvaru mērķauditorijā.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">4. Vēlēšanās jeb nodoms pirkt</th><td role="cell"><span class="cell-label" aria-hidden="true">Praktiska izpausme</span>Gatavība pirkt vai veikt ar pirkumu saistītu soli. Augstā iesaistē palīdz pierādījumi un skaidrs nākamais solis. Zemā iesaistē termiņots stimuls var rosināt rīkoties uzreiz.</td><td role="cell"><span class="cell-label" aria-hidden="true">Kā to pārbaudīt</span>Pirkuma nodoma aptauja. Demonstrācijas pieteikums vai pievienošana grozam rāda atsevišķu uzvedības soli.</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">5. Līdzdalība jeb palīdzība pirkumā</th><td role="cell"><span class="cell-label" aria-hidden="true">Praktiska izpausme</span>Pircējs jūtas spējīgs pabeigt pirkumu. Pārbaudi, vai to kavē cena, pieejamība, maksāšana, piegāde, neskaidri noteikumi vai uztvertais risks.</td><td role="cell"><span class="cell-label" aria-hidden="true">Kā to pārbaudīt</span>Šķēršļu aptauja, atbirums pirkuma solī, pabeigto pasūtījumu īpatsvars un pieejamības dati.</td></tr>
+          </tbody>
+        </table></div>
+        <p><strong>Mērķa piemērs.</strong> Sešās nedēļās palielināt zīmola spontānu atcerēšanos mērķsegmentā no 20 % līdz 30 %. Pirms un pēc kampaņas vienādi jautā, kādi zīmoli nāk prātā, domājot par kategoriju. Pieaugums ir 10 procentpunkti. Pirkumu skaitu mēra atsevišķi, lai pārbaudītu uzvedības mērķi.</p>
+        <p class="small">E 5, 3.–67. un 95.–107. slaids. Pieci efekti 9. slaidā. Atpazīšanas un atcerēšanās izvēle 66. slaidā.</p>
+      </article>
+      <article id="attieksme-un-motivi" data-find>
+        <h3>Attieksme, motivācija un pirkuma šķēršļi</h3>
+        <p><strong>Attieksmes izvēle pēc sākuma stāvokļa.</strong> Par nezināmu zīmolu attieksmi izveido. Daļēji labvēlīgu uzlabo ar pircējam svarīgu pierādījumu. Izteikti labvēlīgu saglabā. Vienaldzību var modificēt, sasaistot zīmolu ar citu motīvu. Negatīvas attieksmes maiņai vispirms izzina un novērš tās konkrēto iemeslu.</p>
+        <p><strong>Astoņi motīvi.</strong> Pieci informatīvie jeb negatīvie motīvi ir problēmas novēršana, izvairīšanās no problēmas, nepilnīgs apmierinājums, jaukts pieņemšanas un izvairīšanās motīvs un krājumu izsīkšana. Trīs transformējošie jeb pozitīvie ir juteklisks apmierinājums, intelektuāls vai profesionāls gandarījums un sociāls atbalsts. Piemēram, konkrētu sliktu pieredzi risina ar pierādījumu, savukārt baudas motīvu var parādīt ar degustāciju.</p>
+        <p><strong>Fišbeina multiatribūtu modelis.</strong> Izvēlētam pircēja motīvam katram ieguvumam reizina uzskata vērtējumu ar attiecīgā ieguvuma emocionālo nozīmi, tad ieguldījumus summē. Vienkāršotā ilustrācijā ieguvumi ar vērtējumiem 4 un 2 un svariem 3 un 1 dod 4 × 3 + 2 × 1 = 14. Rādītājs ļauj salīdzināt zīmolus ar vienādu skalu un atlasīt svarīgāko ieguvumu komunikācijai. Lekcija papildus aplūko autonomās emocijas un salīdzinājumu ar alternatīvām.</p>
+        <p><strong>Palīdzība pirkumā.</strong> Šķēršļus pēti jau pirms kampaņas. Ja neskaidra piegāde traucē pirkumu, vienlaikus sakārto informāciju un pašu piegādes piedāvājumu. Skaidrs vēstījums var kliedēt šaubas par atgriešanu, savukārt nepieejama prece prasa arī sadales risinājumu.</p>
+        <p class="small">E 5, 68.–107. slaids. Motīvi 78.–79., Fišbeina modelis 81.–85., attieksmes mērķi 88.–93., palīdzība pirkumā 101.–107. slaidā.</p>
+      </article>
+    </section>
+
+    <section id="prakse" aria-labelledby="prakse-title">
+      <h2 id="prakse-title">Praktiski atbilžu paraugi</h2>
+      <article id="rekomendacijas-paraugs" data-find>
+        <h3>1. uzdevums · rekomendācija jaunam zīmolam esošā kategorijā</h3>
+        <p><strong>Hipotētiska situācija.</strong> Uzņēmums «Auzu Rīts» ievieš jaunu auzu uzkodu zīmolu esošā uzkodu kategorijā. Testa veikalos kategorijai ir regulāri pircēji, bet viņi jauno iepakojumu vēl nepazīst. Uzņēmums vēlas sešās nedēļās iegūt 300 pirmos pirkumus testa veikalos.</p>
+        <p><strong>Rekomendācija.</strong> Prioritāri uzrunāt citu zīmolu nepastāvīgos kategorijas pircējus. Viņi kategoriju jau pazīst un izvēlē ir elastīgāki par vienam konkurentam lojālajiem. Pie plaukta lietot skaidru iepakojuma attēlu un kategorijas apzīmējumu. Degustācijā ļaut pārbaudīt garšu, bet uz vietas piedāvāt pirmā pirkuma kuponu. Vietējā reklāmā izmantot tās pašas zīmola pazīmes un norādīt iesaistītos veikalus. Pirms reklāmas sākuma saskaņot plaukta izvietojumu un krājumus ar tirgotāju.</p>
+        <p><strong>Teorija praksē.</strong> IMK savieno vietējās reklāmas kontaktu ar atpazīšanu pirkšanas vietā. Degustācija atbalsta izvērtēšanu un mazina šaubas par garšu. Kupons ir noieta stimulēšana, kas palīdz pāriet no vēlmes uz pirmo pirkumu. Budžetu aprēķina ar mērķu–uzdevumu metodi, atsevišķi aplēšot reklāmas kontaktus, degustācijas, materiālus, kuponu izmaksas un mērījumus.</p>
+        <p><strong>Pārbaude.</strong> Izmēģinājumu mēra pēc unikāliem pirmā pirkuma veicējiem, piemēram, izmantojot pieejamus lojalitātes datus. Anonīmus pirkumus uzrāda atsevišķi, ja tos nevar sasaistīt ar unikālu pircēju. Ar līdzīgiem salīdzinājuma veikaliem var vērtēt papildu noietu. Ja prece ir pamanāma, bet pirmo pirkumu ir maz, pārbauda garšas vērtējumu, cenu un pieejamību.</p>
+      </article>
+      <article id="situacijas-paraugs" data-find>
+        <h3>2. uzdevums · konkrēta piemēra analīze no lekcijas</h3>
+        <p><strong>Novērojamais.</strong> Piektās tēmas 101. slaidā ir «Laima» sauklis «Laime ir Laima». Lekcijā to aplūko saistībā ar saldumu izvēli dāvanai. Saukļa vārdu spēle savieno zīmola nosaukumu ar pozitīvu emociju.</p>
+        <p><strong>Teorija praksē.</strong> To var analizēt kā emocionālu zīmola asociāciju un attieksmes nostiprināšanu. Dāvanas situācijā pazīstams zīmols var atvieglot izvēli, ja pircējs to uztver kā iederīgu un drošu. Šādā interpretācijā emocionālā pārliecība palīdz izvēlēties. Ja pircēju kavē cena vai preces trūkums, jāanalizē arī praktiska palīdzība pirkuma izdarīšanā.</p>
+        <p><strong>Pārbaude.</strong> Aptaujā varētu pārbaudīt, kādi zīmoli cilvēkiem nāk prātā, izvēloties saldumu dāvanu, un kādas asociācijas rada sauklis. Lai secinātu par faktisku pirkumu pieaugumu, vajadzīgi pārdošanas dati un salīdzinājums.</p>
+        <p class="small">E 5, 68.–79. un 101. slaids. Dāvanas situācijas analīze izvērš lekcijas piemēru.</p>
+      </article>
+    </section>
+
+    <section id="avoti" data-find aria-labelledby="avoti-title">
+      <h2 id="avoti-title">Lekciju avoti</h2>
+      <p>Konspekts balstīts prof. Andas Batragas kursa «Mārketinga komunikācijas (preču virzīšanas tirgū metodes)» sešās prezentācijās. Slaidu atsauces izmanto PDF lappušu secību no pirmās lappuses.</p>
+      <ul>
+        <li>E 1.1. TEMA (1) un E 1.2. Prezentacija (1) · 1. tēmas divas daļas.</li>
+        <li>E 2.1 · Mārketinga komunikāciju plānošana.</li>
+        <li>E 3 · Pircēju mērķgrupu noteikšana.</li>
+        <li>E 4 · Pircēju rīcības modelēšana.</li>
+        <li>E 5 · Mārketinga komunikāciju mērķu noteikšana.</li>
+      </ul>
+    </section>
+
+    <section id="rekomendacija" data-find aria-labelledby="rekomendacija-title">
+      <h2 id="rekomendacija-title">1. uzdevums · rekomendācija uzņēmumam</h2>
+      <ol>
+        <li><strong>Situācija.</strong> Nosauc uzņēmumu, preci un problēmu vienā vai divos teikumos. Piemēram, pircēji apskata preci, bet reti noformē pirkumu.</li>
+        <li><strong>Mērķis un auditorija.</strong> Formulē, kādu rīcību no kuras pircēju grupas uzņēmums vēlas panākt. Ievēro uzdevumā doto budžetu, laiku un kanālus.</li>
+        <li><strong>Teorija.</strong> Izskaidro uzdevumam atbilstošo jēdzienu vienā teikumā un norādi, kura situācijas pazīme pamato tā izvēli.</li>
+        <li><strong>Pasākums.</strong> Pasaki, ko uzņēmums darīs, kam, kurā kanālā, kad un ar kādu vēstījumu vai aicinājumu uz darbību. Ja uzdevums prasa vairākas rekomendācijas, norādi to secību vai atšķirīgās lomas.</li>
+        <li><strong>Pamatojums.</strong> Izskaidro paredzēto iedarbību. Ja svarīgs ierobežojums var mainīt izvēli, nosauc to un norādi, kā ar to rēķināsies.</li>
+        <li><strong>Novērtēšana.</strong> Nosauc galveno rezultāta rādītāju un mērīšanas periodu. Ja iespējams, izvēlies salīdzinājuma grupu vai sākuma līmeni un pasaki, ko darītu, ja rezultāts neuzlabotos.</li>
+      </ol>
+      <p class="template">Uzņēmumam <strong>[X]</strong> ieteiktu <strong>[pasākums]</strong> auditorijai <strong>[grupa]</strong> <strong>[kanālā un laikā]</strong>, lai <strong>[mērķis]</strong>. Situācijā <strong>[konkrēts fakts]</strong>. Saskaņā ar <strong>[jēdziens un tā būtība]</strong> pasākums var palīdzēt, jo <strong>[iedarbības skaidrojums]</strong>. Rezultātu vērtētu <strong>[periodā]</strong> pēc <strong>[rādītājs un salīdzinājums]</strong>.</p>
+    </section>
+
+    <section id="piemers" data-find aria-labelledby="piemers-title">
+      <h2 id="piemers-title">2. uzdevums · konkrētas situācijas analīze</h2>
+      <ol>
+        <li><strong>Iezīmē situāciju.</strong> Nosauc uzņēmumu, preci, auditoriju un apstākli, kurā cilvēks sastop vēstījumu. Ja piemērs ir hipotētisks un uzdevums to pieļauj, skaidri to norādi.</li>
+        <li><strong>Apraksti redzamo.</strong> Pieraksti konkrēto vēstījumu vai piedāvājumu, kanālu, laiku, termiņu vai darbību, ko uzņēmums prasa no klienta.</li>
+        <li><strong>Piesaisti teoriju.</strong> Nosauc metodi vai jēdzienu. Parādi, kura novērojamā detaļa katru interpretāciju pamato.</li>
+        <li><strong>Izskaidro iespējamo iedarbību.</strong> Kāpēc auditorija varētu pievērst uzmanību, apsvērt pirkumu vai rīkoties? Kāds apstāklis iedarbību var vājināt?</li>
+        <li><strong>Formulē secinājumu.</strong> Atbildi uz prasīto aspektu. Ja kampaņas rezultāti nav pieejami, apraksti paredzamo iedarbību kā pieņēmumu un nosauc datus, ar kuriem to varētu pārbaudīt.</li>
+      </ol>
+      <p class="template">Situācijā <strong>[kas, kur, kad]</strong> uzņēmums <strong>[konkrēta darbība]</strong>. To var skaidrot ar <strong>[teorijas jēdziens]</strong>, jo <strong>[novērojamā pazīme]</strong>. Auditorijai <strong>[grupa]</strong> tas var <strong>[iespējamā iedarbība]</strong>, ja <strong>[nosacījums]</strong>. Šo iedarbību varētu pārbaudīt ar <strong>[dati]</strong>.</p>
+    </section>
+
+    <section id="parbaude" data-find aria-labelledby="parbaude-title">
+      <h2 id="parbaude-title">Atbildes pārbaudes saraksts</h2>
+      <h3>Ātra pārbaude pirms iesniegšanas</h3>
+      <ul class="checks">
+        <li><label><input type="checkbox"> Es atbildēju uz situācijā prasīto virzīšanas aspektu.</label></li>
+        <li><label><input type="checkbox"> Norādīju uzņēmumu, preci, auditoriju un nozīmīgo situācijas detaļu.</label></li>
+        <li><label><input type="checkbox"> Nosaucu atbilstošo teorijas jēdzienu un izskaidroju tā saikni ar situācijas detaļu.</label></li>
+        <li><label><input type="checkbox"> Rekomendācijā precizēju rīcību, kanālu, auditoriju, vēstījumu un laiku, ciktāl tie attiecas uz uzdevumu.</label></li>
+        <li><label><input type="checkbox"> Piemēra analīzē nošķīru redzamo no pieņēmuma par iedarbību.</label></li>
+        <li><label><input type="checkbox"> Secinājumā sasaistīju atbildi ar mērķi un, ja attiecināms, nosaucu pārbaudāmu rādītāju.</label></li>
+      </ul>
+      <button id="reset-checks" type="button" hidden>Notīrīt atzīmes</button>
+      <h3>1.–5. tēmas caurskatīšanas režģis</h3>
+      <p>Izskrien cauri visām piecām rindām. Ja tēma palīdz atbildēt uz konkrēto jautājumu, pieraksti jēdzienu, situācijas faktu un secinājumu. Piemēram, «atpazīšana → izvēle pie plaukta → reklāmā un plauktā atkārto vienu iepakojuma pazīmi».</p>
+      <div class="table" role="region" aria-label="Piecu tēmu pārbaudes režģis" tabindex="0"><table role="table">
+        <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Lekcija</th><th scope="col" role="columnheader">Ko pārbaudīt teorijā</th><th scope="col" role="columnheader">Ko pierakstīt par situāciju</th></tr></thead>
+        <tbody role="rowgroup">
+          <tr role="row"><th scope="row" role="rowheader"><a href="#tema-1">1. tēma</a></th><td role="cell"><span class="cell-label" aria-hidden="true">Ko pārbaudīt teorijā</span>Virzīšanas metode, komunikācijas modelis, troksnis, IMK un dzīves cikls.</td><td role="cell"><span class="cell-label" aria-hidden="true">Ko pierakstīt par situāciju</span>Kas runā ar kuru? Kāda ir metodes un kanāla loma? Kā savienojas vēstījumi un pārējie 4P?</td></tr>
+          <tr role="row"><th scope="row" role="rowheader"><a href="#tema-2">2. tēma</a></th><td role="cell"><span class="cell-label" aria-hidden="true">Ko pārbaudīt teorijā</span>Situācija, uzņēmuma mērķis un termiņš, plānošanas posmi, budžeta metode.</td><td role="cell"><span class="cell-label" aria-hidden="true">Ko pierakstīt par situāciju</span>Kādu rezultātu uzņēmums grib sasniegt? Kādas aktivitātes vajag, cik tās maksā un kā tās vērtēs?</td></tr>
+          <tr role="row"><th scope="row" role="rowheader"><a href="#tema-3">3. tēma</a></th><td role="cell"><span class="cell-label" aria-hidden="true">Ko pārbaudīt teorijā</span>Mērķtirgus un auditorija, piecas grupas, svira, izmēģinājums un atkārtojums.</td><td role="cell"><span class="cell-label" aria-hidden="true">Ko pierakstīt par situāciju</span>Kura grupa ir prioritāra? Ko tā pērk pašlaik? Kāpēc ieguldījums šajā grupā var atmaksāties?</td></tr>
+          <tr role="row"><th scope="row" role="rowheader"><a href="#tema-4">4. tēma</a></th><td role="cell"><span class="cell-label" aria-hidden="true">Ko pārbaudīt teorijā</span>PUM, LPP posmi, lomas, vieta, laiks, iesaiste un pārejas risks.</td><td role="cell"><span class="cell-label" aria-hidden="true">Ko pierakstīt par situāciju</span>Kurā posmā ir šķērslis? Kas lemj vai ietekmē, kur un kad viņu sasniegt un kādu argumentu dot?</td></tr>
+          <tr role="row"><th scope="row" role="rowheader"><a href="#tema-5">5. tēma</a></th><td role="cell"><span class="cell-label" aria-hidden="true">Ko pārbaudīt teorijā</span>Pieci komunikācijas efekti, atpazīšana un atcerēšanās, attieksme, nodoms un palīdzība.</td><td role="cell"><span class="cell-label" aria-hidden="true">Ko pierakstīt par situāciju</span>Kāda pārmaiņa vajadzīga auditorijas uztverē? Kā to izmērīt atsevišķi no pirkuma?</td></tr>
+        </tbody>
+      </table></div>
+      <p class="back"><a href="#sakums">Atpakaļ uz sākumu</a></p>
+    </section>
+  </main>
+  <script>
+    const query = document.querySelector('#query');
+    const results = document.querySelector('#results');
+    const count = document.querySelector('#count');
+    const matches = document.querySelector('#matches');
+    const fold = (text) => text.toLocaleLowerCase('lv').normalize('NFD').replace(/\p{M}/gu, '');
+    const sections = Array.from(document.querySelectorAll('[data-find]'), (section) => ({
+      id: section.id,
+      title: section.querySelector('h2, h3').textContent,
+      text: fold(`${section.closest('section').querySelector('h2').textContent} ${section.textContent}`),
+    }));
+
+    function updateSearch() {
+      const terms = fold(query.value.trim()).split(/\s+/).filter(Boolean);
+      matches.replaceChildren();
+      results.hidden = terms.length === 0;
+      matches.hidden = true;
+      if (results.hidden) return;
+      const found = sections.filter((section) => terms.every((term) => section.text.includes(term)));
+      count.textContent = found.length ? `Atbilstošās sadaļas (${found.length})` : 'Neviena sadaļa neatbilst meklētajam.';
+      matches.hidden = found.length === 0;
+      for (const section of found) {
+        const item = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = `#${section.id}`;
+        link.textContent = section.title;
+        item.append(link);
+        matches.append(item);
+      }
+    }
+
+    query.addEventListener('input', updateSearch);
+    query.addEventListener('focus', updateSearch);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !results.hidden && document.querySelector('#search-tools').contains(document.activeElement)) {
+        query.focus();
+        results.hidden = true;
+      }
+    });
+    document.querySelector('#clear').addEventListener('click', () => {
+      query.value = '';
+      updateSearch();
+      query.focus();
+    });
+    matches.addEventListener('click', (event) => {
+      const link = event.target.closest('a');
+      if (!link) return;
+      const section = document.getElementById(link.hash.slice(1));
+      results.hidden = true;
+      section.tabIndex = -1;
+      section.focus({ preventScroll: true });
+    });
+    document.querySelector('#print').addEventListener('click', () => window.print());
+    document.querySelector('#search-tools').hidden = false;
+    const reset = document.querySelector('#reset-checks');
+    reset.hidden = false;
+    reset.addEventListener('click', () => {
+      for (const checkbox of document.querySelectorAll('.checks input')) checkbox.checked = false;
+    });
+  </script>
+</body>
+</html>
